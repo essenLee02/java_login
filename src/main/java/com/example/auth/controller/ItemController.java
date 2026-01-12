@@ -1,0 +1,128 @@
+package com.example.auth.controller;
+
+import com.example.auth.model.Item;
+import com.example.auth.service.ItemService;
+import jakarta.servlet.http.HttpSession;
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.*;
+
+import java.math.BigDecimal;
+import java.util.List;
+import java.util.Optional;
+
+@Controller
+public class ItemController {
+
+    private final ItemService itemService;
+
+    public ItemController(ItemService itemService) {
+        this.itemService = itemService;
+    }
+
+    private boolean isLoggedIn(HttpSession session) {
+        return session != null && session.getAttribute("userId") != null;
+    }
+
+    @GetMapping("/items")
+    public String items(Model model, HttpSession session) {
+        if (!isLoggedIn(session)) return "redirect:/login";
+
+        List<Item> items = itemService.listAll();
+        model.addAttribute("items", items);
+        return "items";
+    }
+
+    @GetMapping("/items/new")
+    public String newItem(Model model, HttpSession session) {
+        if (!isLoggedIn(session)) return "redirect:/login";
+
+        model.addAttribute("item", new Item());
+        model.addAttribute("mode", "create");
+        return "item_form";
+    }
+
+    @PostMapping("/items")
+    public String createItem(
+            @RequestParam String code,
+            @RequestParam String description,
+            @RequestParam String itemType,
+            @RequestParam(required = false, defaultValue = "0") String stock,
+            @RequestParam(required = false) String note,
+            @RequestParam String businessUnit,
+            Model model,
+            HttpSession session
+    ) {
+        if (!isLoggedIn(session)) return "redirect:/login";
+
+        Item item = new Item();
+        item.setCode(code == null ? "" : code.trim());
+        item.setDescription(description == null ? "" : description.trim());
+        item.setItemType(itemType);
+        item.setStock(parseBigDecimalOrZero(stock));
+        item.setNote(note);
+        item.setBusinessUnit(businessUnit);
+        String username = String.valueOf(session.getAttribute("userName"));
+        String error = itemService.create(item, username);
+        if (error != null) {
+            model.addAttribute("error", error);
+            model.addAttribute("item", item);
+            model.addAttribute("mode", "create");
+            return "item_form";
+        }
+        return "redirect:/items";
+    }
+
+    @GetMapping("/items/{id}/edit")
+    public String editItem(@PathVariable Long id, Model model, HttpSession session) {
+        if (!isLoggedIn(session)) return "redirect:/login";
+
+        Optional<Item> itemOpt = itemService.getById(id);
+        if (itemOpt.isEmpty()) return "redirect:/items";
+
+        model.addAttribute("item", itemOpt.get());
+        model.addAttribute("mode", "edit");
+        return "item_form";
+    }
+
+    @PostMapping("/items/{id}")
+    public String updateItem(
+            @PathVariable Long id,
+            @RequestParam String description,
+            @RequestParam String itemType,
+            @RequestParam(required = false, defaultValue = "0") String stock,
+            @RequestParam(required = false) String note,
+            Model model,
+            HttpSession session
+    ) {
+        if (!isLoggedIn(session)) return "redirect:/login";
+
+        Optional<Item> itemOpt = itemService.getById(id);
+        if (itemOpt.isEmpty()) return "redirect:/items";
+
+        Item item = itemOpt.get();
+        item.setDescription(description == null ? "" : description.trim());
+        item.setItemType(itemType);
+        item.setStock(parseBigDecimalOrZero(stock));
+        item.setNote(note);
+        String username = String.valueOf(session.getAttribute("userName"));
+        String error = itemService.update(id, item, username);
+        if (error != null) {
+            model.addAttribute("error", error);
+            model.addAttribute("item", item);
+            model.addAttribute("mode", "edit");
+            return "item_form";
+        }
+
+        return "redirect:/items";
+    }
+
+    private static BigDecimal parseBigDecimalOrZero(String input) {
+        try {
+            if (input == null || input.trim().isEmpty()) return BigDecimal.ZERO;
+            return new BigDecimal(input.trim());
+        } catch (Exception ex) {
+            return BigDecimal.ZERO;
+        }
+    }
+}

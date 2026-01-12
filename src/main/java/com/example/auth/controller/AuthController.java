@@ -28,8 +28,8 @@ public class AuthController {
 
     @PostMapping("/login")
     public String login(@RequestParam String email,
-        @RequestParam String password,
-        HttpSession session) {
+                        @RequestParam String password,
+                        HttpSession session) {
 
         var userOpt = userService.authenticate(email, password);
         if (userOpt.isEmpty()) {
@@ -43,9 +43,8 @@ public class AuthController {
 
     @GetMapping("/register")
     public String registerPage(@RequestParam(required = false) String error,
-        @RequestParam(required = false) String success,
-        Model model) {
-
+                               @RequestParam(required = false) String success,
+                               Model model) {
         model.addAttribute("error", error);
         model.addAttribute("success", success);
         return "register";
