@@ -20,6 +20,28 @@ public class ItemController {
         this.itemService = itemService;
     }
 
+    // Dropdown options (sesuai requirement)
+    private static final List<String> BUSINESS_UNITS = List.of(
+            "PT Mindo",
+            "PT Visiniaga",
+            "PT Primavisi",
+            "PT Bimoli",
+            "PT Transmoda"
+    );
+
+    private static final List<String> ITEM_TYPES = List.of(
+            "Finish Good",
+            "Spare Part",
+            "Raw Material",
+            "General Material",
+            "Sawn Timber"
+    );
+
+    private static void putFormOptions(Model model) {
+        model.addAttribute("businessUnits", BUSINESS_UNITS);
+        model.addAttribute("itemTypes", ITEM_TYPES);
+    }
+
     private boolean isLoggedIn(HttpSession session) {
         return session != null && session.getAttribute("userId") != null;
     }
@@ -39,6 +61,7 @@ public class ItemController {
 
         model.addAttribute("item", new Item());
         model.addAttribute("mode", "create");
+        putFormOptions(model);
         return "item_form";
     }
 
@@ -68,6 +91,7 @@ public class ItemController {
             model.addAttribute("error", error);
             model.addAttribute("item", item);
             model.addAttribute("mode", "create");
+            putFormOptions(model);
             return "item_form";
         }
         return "redirect:/items";
@@ -82,6 +106,7 @@ public class ItemController {
 
         model.addAttribute("item", itemOpt.get());
         model.addAttribute("mode", "edit");
+        putFormOptions(model);
         return "item_form";
     }
 
@@ -111,6 +136,7 @@ public class ItemController {
             model.addAttribute("error", error);
             model.addAttribute("item", item);
             model.addAttribute("mode", "edit");
+            putFormOptions(model);
             return "item_form";
         }
 
