@@ -34,7 +34,9 @@ public class ItemController {
             "Spare Part",
             "Raw Material",
             "General Material",
-            "Sawn Timber"
+            "Sawn Timber",
+            "Fixed Asset",
+            "Waste Material"
     );
 
     private static void putFormOptions(Model model) {
