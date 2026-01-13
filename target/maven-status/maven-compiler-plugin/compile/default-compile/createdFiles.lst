@@ -1,5 +1,10 @@
+com\example\auth\repository\ItemRepository.class
 com\example\auth\service\UserService.class
+com\example\auth\controller\ItemController.class
+com\example\auth\service\ItemService.class
 com\example\auth\controller\AuthController.class
 com\example\auth\model\User.class
 com\example\auth\AuthApplication.class
 com\example\auth\repository\UserRepository.class
+com\example\auth\model\Item.class
+com\example\auth\repository\ItemRepository$1.class
