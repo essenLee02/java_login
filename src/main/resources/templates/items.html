@@ -77,9 +77,8 @@
 
             <!-- UPDATED: kalau belum pernah update, pakai create date/user -->
             <td>
-              <div class="small"
-                   th:text="${displayDate}"
-                   th:classappend="${hasUpdate} ? ' text-primary' : ''">
+              <div class="small" th:text="${displayDate}"
+                th:classappend="${hasUpdate} ? ' text-primary' : ''">
               </div>
               <div class="small text-muted" th:text="${displayUser}"></div>
             </td>
