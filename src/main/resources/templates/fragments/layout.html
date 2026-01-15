@@ -1,100 +1,93 @@
 <!doctype html>
-<html xmlns:th="http://www.thymeleaf.org">
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+    <!-- Head fragment: call with th:replace="~{fragments/layout :: head('Page Title')}" -->
     <head th:fragment="head(title)">
-        <meta charset="UTF-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1" />
+
         <title th:text="${title} ?: 'Auth Demo'">Auth Demo</title>
-        
+
         <!-- Bootstrap 5 CSS -->
-        <link rel="stylesheet" th:href="@{/../../../public/bootstrap-5.3.8/css/bootstrap.css}" />
-        <link rel="stylesheet" th:href="@{/../../../public/bootstrap-5.3.8/css/bootstrap.css.map}" />
-        <link rel="stylesheet" th:href="@{/../../../public/bootstrap-5.3.8/css/bootstrap.min.css}" />
-        <link rel="stylesheet" th:href="@{/../../../public/bootstrap-5.3.8/css/bootstrap.min.css.map}" />
-        <link rel="stylesheet" th:href="@{/../../../public/bootstrap-5.3.8/css/bootstrap.rtl.css}" />
-        <link rel="stylesheet" th:href="@{/../../../public/bootstrap-5.3.8/css/bootstrap.rtl.css.map}" />
-        <link rel="stylesheet" th:href="@{/../../../public/bootstrap-5.3.8/css/bootstrap.rtl.min.css}" />
-        <link rel="stylesheet" th:href="@{/../../../public/bootstrap-5.3.8/css/bootstrap.rtl.min.css.map}" />
-        <link rel="stylesheet" th:href="@{/../../../public/bootstrap-5.3.8/css/bootstrap-grid.css}" />
-        <link rel="stylesheet" th:href="@{/../../../public/bootstrap-5.3.8/css/bootstrap-grid.css.map}" />
-        <link rel="stylesheet" th:href="@{/../../../public/bootstrap-5.3.8/css/bootstrap-grid.min.css}" />
-        <link rel="stylesheet" th:href="@{/../../../public/bootstrap-5.3.8/css/bootstrap-grid.min.css.map}" />
-        <link rel="stylesheet" th:href="@{/../../../public/bootstrap-5.3.8/css/bootstrap-grid.rtl.css}" />
-        <link rel="stylesheet" th:href="@{/../../../public/bootstrap-5.3.8/css/bootstrap-grid.rtl.css.map}" />
-        <link rel="stylesheet" th:href="@{/../../../public/bootstrap-5.3.8/css/bootstrap-grid.rtl.min.css}" />
-        <link rel="stylesheet" th:href="@{/../../../public/bootstrap-5.3.8/css/bootstrap-grid.rtl.min.css.map}" />
-        <link rel="stylesheet" th:href="@{/../../../public/bootstrap-5.3.8/css/bootstrap-reboot.css}" />
-        <link rel="stylesheet" th:href="@{/../../../public/bootstrap-5.3.8/css/bootstrap-reboot.css.map}" />
-        <link rel="stylesheet" th:href="@{/../../../public/bootstrap-5.3.8/css/bootstrap-reboot.min.css}" />
-        <link rel="stylesheet" th:href="@{/../../../public/bootstrap-5.3.8/css/bootstrap-reboot.min.css.map}" />
-        <link rel="stylesheet" th:href="@{/../../../public/bootstrap-5.3.8/css/bootstrap-reboot.rtl.css}" />
-        <link rel="stylesheet" th:href="@{/../../../public/bootstrap-5.3.8/css/bootstrap-reboot.rtl.css.map}" />
-        <link rel="stylesheet" th:href="@{/../../../public/bootstrap-5.3.8/css/bootstrap-reboot.rtl.min.css}" />
-        <link rel="stylesheet" th:href="@{/../../../public/bootstrap-5.3.8/css/bootstrap-reboot.rtl.min.css.map}" />
-        <link rel="stylesheet" th:href="@{/../../../public/bootstrap-5.3.8/css/bootstrap-utilities.css}" />
-        <link rel="stylesheet" th:href="@{/../../../public/bootstrap-5.3.8/css/bootstrap-utilities.css.map}" />
-        <link rel="stylesheet" th:href="@{/../../../public/bootstrap-5.3.8/css/bootstrap-utilities.min.css}" />
-        <link rel="stylesheet" th:href="@{/../../../public/bootstrap-5.3.8/css/bootstrap-utilities.rtl.css}" />
-        <link rel="stylesheet" th:href="@{/../../../public/bootstrap-5.3.8/css/bootstrap-utilities.rtl.css.map}" />
-        <link rel="stylesheet" th:href="@{/../../../public/bootstrap-5.3.8/css/bootstrap-utilities.rtl.min.css.map}" />
+        <link rel="stylesheet" th:href="@{/bootstrap-5.3.8/css/bootstrap.css}" />
+        <link rel="stylesheet" th:href="@{/bootstrap-5.3.8/css/bootstrap.css.map}" />
+        <link rel="stylesheet" th:href="@{/bootstrap-5.3.8/css/bootstrap.min.css}" />
+        <link rel="stylesheet" th:href="@{/bootstrap-5.3.8/css/bootstrap.min.css.map}" />
+        <link rel="stylesheet" th:href="@{/bootstrap-5.3.8/css/bootstrap.rtl.css}" />
+        <link rel="stylesheet" th:href="@{/bootstrap-5.3.8/css/bootstrap.rtl.css.map}" />
+        <link rel="stylesheet" th:href="@{/bootstrap-5.3.8/css/bootstrap.rtl.min.css}" />
+        <link rel="stylesheet" th:href="@{/bootstrap-5.3.8/css/bootstrap.rtl.min.css.map}" />
+        <link rel="stylesheet" th:href="@{/bootstrap-5.3.8/css/bootstrap-grid.css}" />
+        <link rel="stylesheet" th:href="@{/bootstrap-5.3.8/css/bootstrap-grid.css.map}" />
+        <link rel="stylesheet" th:href="@{/bootstrap-5.3.8/css/bootstrap-grid.min.css}" />
+        <link rel="stylesheet" th:href="@{/bootstrap-5.3.8/css/bootstrap-grid.min.css.map}" />
+        <link rel="stylesheet" th:href="@{/bootstrap-5.3.8/css/bootstrap-grid.rtl.css}" />
+        <link rel="stylesheet" th:href="@{/bootstrap-5.3.8/css/bootstrap-grid.rtl.css.map}" />
+        <link rel="stylesheet" th:href="@{/bootstrap-5.3.8/css/bootstrap-grid.rtl.min.css}" />
+        <link rel="stylesheet" th:href="@{/bootstrap-5.3.8/css/bootstrap-grid.rtl.min.css.map}" />
+        <link rel="stylesheet" th:href="@{/bootstrap-5.3.8/css/bootstrap-reboot.css}" />
+        <link rel="stylesheet" th:href="@{/bootstrap-5.3.8/css/bootstrap-reboot.css.map}" />
+        <link rel="stylesheet" th:href="@{/bootstrap-5.3.8/css/bootstrap-reboot.min.css}" />
+        <link rel="stylesheet" th:href="@{/bootstrap-5.3.8/css/bootstrap-reboot.min.css.map}" />
+        <link rel="stylesheet" th:href="@{/bootstrap-5.3.8/css/bootstrap-reboot.rtl.css}" />
+        <link rel="stylesheet" th:href="@{/bootstrap-5.3.8/css/bootstrap-reboot.rtl.css.map}" />
+        <link rel="stylesheet" th:href="@{/bootstrap-5.3.8/css/bootstrap-reboot.rtl.min.css}" />
+        <link rel="stylesheet" th:href="@{/bootstrap-5.3.8/css/bootstrap-reboot.rtl.min.css.map}" />
+        <link rel="stylesheet" th:href="@{/bootstrap-5.3.8/css/bootstrap-utilities.css}" />
+        <link rel="stylesheet" th:href="@{/bootstrap-5.3.8/css/bootstrap-utilities.css.map}" />
+        <link rel="stylesheet" th:href="@{/bootstrap-5.3.8/css/bootstrap-utilities.min.css}" />
+        <link rel="stylesheet" th:href="@{/bootstrap-5.3.8/css/bootstrap-utilities.rtl.css}" />
+        <link rel="stylesheet" th:href="@{/bootstrap-5.3.8/css/bootstrap-utilities.rtl.css.map}" />
+        <link rel="stylesheet" th:href="@{/bootstrap-5.3.8/css/bootstrap-utilities.rtl.min.css.map}" />
 
         <!-- Bootstrap 5 JS -->
-        <script th:src="@{/../../../public/bootstrap-5.3.8/js/bootstrap.bundle.js}"></script>
-        <script th:src="@{/../../../public/bootstrap-5.3.8/js/bootstrap.bundle.js.map}"></script>
-        <script th:src="@{/../../../public/bootstrap-5.3.8/js/bootstrap.bundle.min.js}"></script>
-        <script th:src="@{/../../../public/bootstrap-5.3.8/js/bootstrap.bundle.min.js.map}"></script>
-        <script th:src="@{/../../../public/bootstrap-5.3.8/js/bootstrap.esm.js}"></script>
-        <script th:src="@{/../../../public/bootstrap-5.3.8/js/bootstrap.esm.js.map}"></script>
-        <script th:src="@{/../../../public/bootstrap-5.3.8/js/bootstrap.esm.min.js}"></script>
-        <script th:src="@{/../../../public/bootstrap-5.3.8/js/bootstrap.esm.min.js.map}"></script>
-        <script th:src="@{/../../../public/bootstrap-5.3.8/js/bootstrap.js}"></script>
-        <script th:src="@{/../../../public/bootstrap-5.3.8/js/bootstrap.js.map}"></script>
-        <script th:src="@{/../../../public/bootstrap-5.3.8/js/bootstrap.min.js}"></script>
-        <script th:src="@{/../../../public/bootstrap-5.3.8/js/bootstrap.min.js.map}"></script>
+        <script th:src="@{/bootstrap-5.3.8/js/bootstrap.bundle.js}"></script>
+        <script th:src="@{/bootstrap-5.3.8/js/bootstrap.bundle.js.map}"></script>
+        <script th:src="@{/bootstrap-5.3.8/js/bootstrap.bundle.min.js}"></script>
+        <script th:src="@{/bootstrap-5.3.8/js/bootstrap.bundle.min.js.map}"></script>
+        <script th:src="@{/bootstrap-5.3.8/js/bootstrap.esm.js}"></script>
+        <script th:src="@{/bootstrap-5.3.8/js/bootstrap.esm.js.map}"></script>
+        <script th:src="@{/bootstrap-5.3.8/js/bootstrap.esm.min.js}"></script>
+        <script th:src="@{/bootstrap-5.3.8/js/bootstrap.esm.min.js.map}"></script>
+        <script th:src="@{/bootstrap-5.3.8/js/bootstrap.js}"></script>
+        <script th:src="@{/bootstrap-5.3.8/js/bootstrap.js.map}"></script>
+        <script th:src="@{/bootstrap-5.3.8/js/bootstrap.min.js}"></script>
+        <script th:src="@{/bootstrap-5.3.8/js/bootstrap.min.js.map}"></script>
 
-        <!-- jQuery -->
-        <script th:src="@{/../../../public/js/jQuery_V3.7.1.min.js}"></script>
+        <!-- jQuery 3.7.1 (from src/main/resources/public/js/jQuery_V3.7.1.min.js) -->
+        <script th:src="@{/js/jQuery_V3.7.1.min.js}"></script>
     </head>
 
     <body>
-        <!-- Navbar Start -->
+        <!-- Navbar fragment -->
         <nav th:fragment="navbar" class="navbar navbar-expand-lg navbar-dark bg-dark">
             <div class="container">
-                <a class="navbar-brand" th:href="@{/dashboard}"
-                    th:text="${session.userName} ?: 'Auth Demo'">
-                    Auth Demo
-                </a>
+                <a class="navbar-brand" href="/dashboard" th:text="${session.userName} ?: 'Auth Demo'">Auth Demo</a>
 
-                <!-- tombol toggler hanya akan berfungsi kalau Bootstrap JS ada -->
                 <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#nav"
-                        aria-controls="nav" aria-expanded="false" aria-label="Toggle navigation">
+                    aria-controls="nav" aria-expanded="false" aria-label="Toggle navigation">
                     <span class="navbar-toggler-icon"></span>
                 </button>
 
                 <div class="collapse navbar-collapse" id="nav">
                     <ul class="navbar-nav me-auto">
-                    <li class="nav-item"><a class="nav-link" th:href="@{/items}">Item Master</a></li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="/items">Item Master</a>
+                        </li>
                     </ul>
-
-                    <form th:action="@{/logout}" method="post" class="d-inline">
-                        <button type="submit" class="btn btn-outline-light btn-sm">Logout</button>
-                    </form>
+                    <div class="d-flex">
+                        <form action="/logout" method="post" class="d-inline">
+                            <button type="submit" class="btn btn-outline-light btn-sm">Logout</button>
+                        </form>
+                    </div>
                 </div>
             </div>
-        </nav>      
-        <!-- Navbar End -->        
+        </nav>
 
-        <!-- Bootstrap JS -->
-        <!-- Kamu belum punya file JS bootstrap di path yang kamu tulis,
-        
-        jadi bagian ini aman dibuat conditional: hanya load kalau file JS ada -->
+        <!-- Scripts fragment (place at end of each page) -->
         <div th:fragment="scripts">
-            <!-- Jika nanti kamu sudah taruh JS bootstrap di public/bootstrap-5.3.8/js/,
-            ubah salah satu ini sesuai file yang tersedia -->
-            <!-- <script th:src="@{/bootstrap-5.3.8/js/bootstrap.bundle.min.js}"></script> -->
-            <!-- <script th:src="@{/bootstrap-5.3.8/js/bootstrap.bundle.js}"></script> -->
-            <!-- <script th:src="@{/bootstrap-5.3.8/js/bootstrap.min.js}"></script> -->
-            <!-- <script th:src="@{/bootstrap-5.3.8/js/bootstrap.js}"></script> -->
+            <!-- Bootstrap 5.3.8 JS bundle (Popper included).
+            Make sure file exists at: src/main/resources/public/bootstrap-5.3.8/js/bootstrap.bundle.min.js -->
+            <script th:src="@{/bootstrap-5.3.8/js/bootstrap.bundle.min.js}"></script>
         </div>
-
     </body>
 </html>
