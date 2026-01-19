@@ -1,10 +1,11 @@
 <!doctype html>
 <html lang="en" xmlns:th="http://www.thymeleaf.org">
-    <!-- Head fragment: call with th:replace="~{fragments/layout :: head('Page Title')}" -->
+
     <head th:fragment="head(title)">
         <meta charset="UTF-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1" />
 
+        <!-- ✅ Elvis operator yang benar -->
         <title th:text="${title} ?: 'Auth Demo'">Auth Demo</title>
 
         <!-- Bootstrap 5 CSS -->
@@ -55,39 +56,90 @@
 
         <!-- jQuery 3.7.1 (from src/main/resources/public/js/jQuery_V3.7.1.min.js) -->
         <script th:src="@{/js/jQuery_V3.7.1.min.js}"></script>
+
+        <!-- ✅ AdminKit CSS (pakai th:href) -->
+        <link rel="stylesheet" th:href="@{/Template/admin_kit_template/static/css/app.css}" />
+
+        <!-- Admin Kit Template Start -->
+        <link rel="stylesheet" th:href="@{/Template/admin_kit_template/static/css/app.css}" />
+        <link rel="stylesheet" th:href="@{/Template/admin_kit_template/static/css/app.css.map}" />
+        <script th:src="@{/Template/admin_kit_template/static/js/app.js}"></script>
+        <script th:src="@{/Template/admin_kit_template/static/js/app.js.map}"></script>
+        <!-- Admin Kit Template End -->
+
+
+        <!-- Toast Template Start -->
+        <link rel="stylesheet" th:href="@{/Template/toast/toastr.min.css}" />
+        <!-- Toast Template End -->
+
+        <!-- Icon Font Stylesheet Start -->
+        <link rel="stylesheet" th:href="@{/Template/font_awesome_6_6_0/css/all.min.css}" />
+        <!-- Icon Font Stylesheet End -->
     </head>
 
     <body>
-        <!-- Navbar fragment -->
-        <nav th:fragment="navbar" class="navbar navbar-expand-lg navbar-dark bg-dark">
-            <div class="container">
-                <a class="navbar-brand" href="/dashboard" th:text="${session.userName} ?: 'Auth Demo'">Auth Demo</a>
+        <!-- Navbar fragment Start -->
+        <nav th:fragment="sidebar" id="sidebar" class="sidebar js-sidebar">
+            <div class="sidebar-content js-simplebar">
+                <a class="sidebar-brand" href="/dashboard">
+                    <span class="align-middle" th:text="${session.userName} ?: 'Auth Demo'">Auth Demo</span>
+                </a>
+                <ul class="sidebar-nav">
+                    <li class="sidebar-header">Pages</li>
 
-                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#nav"
-                    aria-controls="nav" aria-expanded="false" aria-label="Toggle navigation">
-                    <span class="navbar-toggler-icon"></span>
-                </button>
-
-                <div class="collapse navbar-collapse" id="nav">
-                    <ul class="navbar-nav me-auto">
-                        <li class="nav-item">
-                            <a class="nav-link" href="/items">Item Master</a>
-                        </li>
-                    </ul>
-                    <div class="d-flex">
-                        <form action="/logout" method="post" class="d-inline">
-                            <button type="submit" class="btn btn-outline-light btn-sm">Logout</button>
+                    <li class="sidebar-item">
+                        <a class="sidebar-link" href="/dashboard">
+                            <i class="align-middle" data-feather="sliders"></i>
+                            <span class="align-middle">Dashboard</span>
+                        </a>
+                    </li>
+                    <li class="sidebar-item">
+                        <a class="sidebar-link" href="/items">
+                            <i class="align-middle" data-feather="package"></i>
+                            <span class="align-middle">Item Master</span>
+                        </a>
+                    </li>
+                    <li class="sidebar-item">
+                        <form action="/logout" method="post" class="px-3 mt-2">
+                            <button type="submit" class="btn btn-outline-light btn-sm w-100">Logout</button>
                         </form>
+                    </li>
+                </ul>
+
+                <div class="sidebar-cta">
+                    <div class="sidebar-cta-content">
+                        <strong class="d-inline-block mb-2">Upgrade to Pro</strong>
+                        <div class="mb-3 text-sm">
+                            Are you looking for more components? Check out our premium version.
+                        </div>
+                        <div class="d-grid">
+                            <a href="#" class="btn btn-primary">Upgrade to Pro</a>
+                        </div>
                     </div>
                 </div>
             </div>
         </nav>
+        <!-- Navbar fragment End -->
+        
+        <!-- ✅ Scripts fragment (taruh sebelum </body> di tiap page) -->
+        <div th:fragment="scripts(extraScripts)">
+            <!-- jQuery -->
+            <script th:src="@{/js/jQuery_V3.7.1.min.js}"></script>
 
-        <!-- Scripts fragment (place at end of each page) -->
-        <div th:fragment="scripts">
-            <!-- Bootstrap 5.3.8 JS bundle (Popper included).
-            Make sure file exists at: src/main/resources/public/bootstrap-5.3.8/js/bootstrap.bundle.min.js -->
+            <!-- Bootstrap Bundle -->
             <script th:src="@{/bootstrap-5.3.8/js/bootstrap.bundle.min.js}"></script>
+
+            <!-- AdminKit JS -->
+            <script th:src="@{/Template/admin_kit_template/static/js/app.js}"></script>
+
+            <!-- Feather icons init (AdminKit biasanya pakai ini) -->
+            <script>
+                if (window.feather) { feather.replace(); }
+            </script>
+
+            <!-- slot tambahan script per-page -->
+            <th:block th:if="${extraScripts != null}" th:replace="${extraScripts}"></th:block>
         </div>
+
     </body>
 </html>
