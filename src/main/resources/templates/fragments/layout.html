@@ -84,6 +84,7 @@
                 <a class="sidebar-brand" href="/dashboard">
                     <span class="align-middle" th:text="${session.userName} ?: 'Auth Demo'">Auth Demo</span>
                 </a>
+
                 <ul class="sidebar-nav">
                     <li class="sidebar-header">Pages</li>
 
@@ -93,12 +94,14 @@
                             <span class="align-middle">Dashboard</span>
                         </a>
                     </li>
+
                     <li class="sidebar-item">
                         <a class="sidebar-link" href="/items">
                             <i class="align-middle" data-feather="package"></i>
                             <span class="align-middle">Item Master</span>
                         </a>
                     </li>
+
                     <li class="sidebar-item">
                         <form action="/logout" method="post" class="px-3 mt-2">
                             <button type="submit" class="btn btn-outline-light btn-sm w-100">Logout</button>
@@ -120,7 +123,7 @@
             </div>
         </nav>
         <!-- Navbar fragment End -->
-        
+            
         <!-- ✅ Scripts fragment (taruh sebelum </body> di tiap page) -->
         <div th:fragment="scripts(extraScripts)">
             <!-- jQuery -->

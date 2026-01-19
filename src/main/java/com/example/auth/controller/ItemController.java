@@ -58,6 +58,11 @@ public class ItemController {
     public String items(Model model, HttpSession session) {
         if (!isLoggedIn(session)) return "redirect:/login";
 
+        /* if ("logout".equals(action)) {
+            session.invalidate();
+            return "redirect:/login";
+        }*/
+
         List<Item> items = itemService.listAll();
         model.addAttribute("items", items);
         return "items";
@@ -168,4 +173,5 @@ public class ItemController {
             return BigDecimal.ZERO;
         }
     }
+
 }

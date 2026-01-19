@@ -3,91 +3,92 @@
     <head th:replace="~{fragments/layout :: head('Item Master')}"></head>
 
     <body>
-        <div class="wrapper">
+        <form method="POST" action="/items">
+            <div class="wrapper">
+                <!-- ✅ Sidebar dari layout -->
+                <div th:replace="~{fragments/layout :: sidebar}"></div>
 
-            <!-- ✅ Sidebar dari layout -->
-            <div th:replace="~{fragments/layout :: sidebar}"></div>
+                <!-- ✅ Struktur AdminKit: main/content -->
+                <div class="main">
+                    <main class="content">
+                        <div class="container-fluid p-0">
 
-            <!-- ✅ Struktur AdminKit: main/content -->
-            <div class="main">
-                <main class="content">
-                    <div class="container-fluid p-0">
-
-                        <div class="d-flex justify-content-between align-items-center mb-3">
-                            <div>
-                                <h3 class="mb-0">Item Master</h3>
-                                <div class="text-muted">Manage items (unique by <b>Code + Business Unit</b>)</div>
+                            <div class="d-flex justify-content-between align-items-center mb-3">
+                                <div>
+                                    <h3 class="mb-0">Item Master</h3>
+                                    <div class="text-muted">Manage items (unique by <b>Code + Business Unit</b>)</div>
+                                </div>
+                                <a class="btn btn-primary" href="/items/new">+ New Item</a>
                             </div>
-                            <a class="btn btn-primary" href="/items/new">+ New Item</a>
-                        </div>
 
-                        <div th:if="${success}" class="alert alert-success" th:text="${success}"></div>
-                        <div th:if="${error}" class="alert alert-danger" th:text="${error}"></div>
+                            <div th:if="${success}" class="alert alert-success" th:text="${success}"></div>
+                            <div th:if="${error}" class="alert alert-danger" th:text="${error}"></div>
 
-                        <div class="card">
-                            <div class="card-body">
-                                <div class="table-responsive">
-                                    <table class="table table-sm table-striped align-middle">
-                                        <thead class="table-light">
-                                        <tr>
-                                            <th style="width:80px">ID</th>
-                                            <th>Code</th>
-                                            <th>Description</th>
-                                            <th>Type</th>
-                                            <th class="text-end">Stock</th>
-                                            <th>Business Unit</th>
-                                            <th>Created</th>
-                                            <th>Updated</th>
-                                            <th style="width:110px">Action</th>
-                                        </tr>
-                                        </thead>
-                                        <tbody>
-                                        <tr th:each="it : ${items}"
-                                            th:with="
-                                                hasUpdate=${it.updatedAt != null},
-                                                displayDate=${hasUpdate ? it.updatedAt : it.createdAt},
-                                                displayUser=${hasUpdate ? it.updatedBy : it.createdBy}
-                                            ">
-                                            <td th:text="${it.id}"></td>
-                                            <td th:text="${it.code}"></td>
-                                            <td th:text="${it.description}"></td>
-                                            <td th:text="${it.itemType}"></td>
-                                            <td class="text-end" th:text="${it.stock}"></td>
-                                            <td th:text="${it.businessUnit}"></td>
+                            <div class="card">
+                                <div class="card-body">
+                                    <div class="table-responsive">
+                                        <table class="table table-sm table-striped align-middle">
+                                            <thead class="table-light">
+                                            <tr>
+                                                <th style="width:80px">ID</th>
+                                                <th>Code</th>
+                                                <th>Description</th>
+                                                <th>Type</th>
+                                                <th class="text-end">Stock</th>
+                                                <th>Business Unit</th>
+                                                <th>Created</th>
+                                                <th>Updated</th>
+                                                <th style="width:110px">Action</th>
+                                            </tr>
+                                            </thead>
+                                            <tbody>
+                                            <tr th:each="it : ${items}"
+                                                th:with="
+                                                    hasUpdate=${it.updatedAt != null},
+                                                    displayDate=${hasUpdate ? it.updatedAt : it.createdAt},
+                                                    displayUser=${hasUpdate ? it.updatedBy : it.createdBy}
+                                                ">
+                                                <td th:text="${it.id}"></td>
+                                                <td th:text="${it.code}"></td>
+                                                <td th:text="${it.description}"></td>
+                                                <td th:text="${it.itemType}"></td>
+                                                <td class="text-end" th:text="${it.stock}"></td>
+                                                <td th:text="${it.businessUnit}"></td>
 
-                                            <td>
-                                                <div class="small" th:text="${it.createdAt}"></div>
-                                                <div class="small text-muted" th:text="${it.createdBy}"></div>
-                                            </td>
+                                                <td>
+                                                    <div class="small" th:text="${it.createdAt}"></div>
+                                                    <div class="small text-muted" th:text="${it.createdBy}"></div>
+                                                </td>
 
-                                            <td>
-                                                <div class="small"
-                                                    th:text="${displayDate}"
-                                                    th:classappend="${hasUpdate} ? ' text-primary' : ''"></div>
-                                                <div class="small text-muted" th:text="${displayUser}"></div>
-                                            </td>
+                                                <td>
+                                                    <div class="small"
+                                                        th:text="${displayDate}"
+                                                        th:classappend="${hasUpdate} ? ' text-primary' : ''"></div>
+                                                    <div class="small text-muted" th:text="${displayUser}"></div>
+                                                </td>
 
-                                            <td>
-                                                <a class="btn btn-outline-secondary btn-sm"
-                                                    th:href="@{/items/{id}/edit(id=${it.id})}">
-                                                    Edit
-                                                </a>
-                                            </td>
-                                        </tr>
+                                                <td>
+                                                    <a class="btn btn-outline-secondary btn-sm"
+                                                        th:href="@{/items/{id}/edit(id=${it.id})}">
+                                                        Edit
+                                                    </a>
+                                                </td>
+                                            </tr>
 
-                                        <tr th:if="${#lists.isEmpty(items)}">
-                                            <td colspan="9" class="text-center text-muted py-4">No items yet.</td>
-                                        </tr>
-                                        </tbody>
-                                    </table>
+                                            <tr th:if="${#lists.isEmpty(items)}">
+                                                <td colspan="9" class="text-center text-muted py-4">No items yet.</td>
+                                            </tr>
+                                            </tbody>
+                                        </table>
+                                    </div>
                                 </div>
                             </div>
-                        </div>
 
-                    </div>
-                </main>
+                        </div>
+                    </main>
+                </div>
             </div>
-        </div>
+        </form>
 
         <!-- Scripts Start -->
         <div th:replace="~{fragments/layout :: scripts(~{::extraScripts})}">
