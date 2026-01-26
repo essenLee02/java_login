@@ -1,6 +1,6 @@
 <!doctype html>
 <html lang="en" xmlns:th="http://www.thymeleaf.org">
-
+    <!-- Head fragment: call with th:replace="~{fragments/layout :: head('Page Title')}" -->
     <head th:fragment="head(title)">
         <meta charset="UTF-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1" />
@@ -67,7 +67,6 @@
         <script th:src="@{/Template/admin_kit_template/static/js/app.js.map}"></script>
         <!-- Admin Kit Template End -->
 
-
         <!-- Toast Template Start -->
         <link rel="stylesheet" th:href="@{/Template/toast/toastr.min.css}" />
         <!-- Toast Template End -->
@@ -78,71 +77,63 @@
     </head>
 
     <body>
-        <!-- Navbar fragment Start -->
-        <nav th:fragment="sidebar" id="sidebar" class="sidebar js-sidebar">
-            <div class="sidebar-content js-simplebar">
-                <a class="sidebar-brand" href="/dashboard">
-                    <span class="align-middle" th:text="${session.userName} ?: 'Auth Demo'">Auth Demo</span>
-                </a>
-
-                <ul class="sidebar-nav">
-                    <li class="sidebar-header">Pages</li>
-
-                    <li class="sidebar-item">
-                        <a class="sidebar-link" href="/dashboard">
-                            <i class="align-middle" data-feather="sliders"></i>
-                            <span class="align-middle">Dashboard</span>
-                        </a>
-                    </li>
-
-                    <li class="sidebar-item">
-                        <a class="sidebar-link" href="/items">
-                            <i class="align-middle" data-feather="package"></i>
-                            <span class="align-middle">Item Master</span>
-                        </a>
-                    </li>
-
-                    <li class="sidebar-item">
-                        <form action="/logout" method="post" class="px-3 mt-2">
-                            <button type="submit" class="btn btn-outline-light btn-sm w-100">Logout</button>
+        <!-- Sidebar fragment Start -->
+        <!-- call with th:replace="~{fragments/layout :: sidebar}" -->
+        <nav id="sidebar" class="sidebar js-sidebar" th:fragment="sidebar">
+			<div class="sidebar-content js-simplebar">
+				<a class="sidebar-brand" href="/dashboard">
+					<span class="align-middle" th:text="${session.userName} ?: 'Auth Demo'"></span>
+				</a>
+				<ul class="sidebar-nav">
+					<li class="sidebar-header">
+						Pages
+					</li>
+					<li class="sidebar-item">
+						<a class="sidebar-link" href="/dashboard">
+							<i class="align-middle" data-feather="sliders"></i>
+							<span class="align-middle">Dashboard</span>
+						</a>
+					</li>
+					<li class="sidebar-item">
+						<a class="sidebar-link" href="pages-profile.html">
+							<i class="align-middle" data-feather="user"></i>
+							<span class="align-middle">Profile</span>
+						</a>
+					</li>
+					<li class="sidebar-item">
+                        <form action="/logout" method="post" class="d-inline">
+                            <button type="submit" class="btn btn-outline-light btn-sm">Logout</button>
                         </form>
-                    </li>
-                </ul>
+					</li>
+				</ul>
 
-                <div class="sidebar-cta">
-                    <div class="sidebar-cta-content">
-                        <strong class="d-inline-block mb-2">Upgrade to Pro</strong>
-                        <div class="mb-3 text-sm">
-                            Are you looking for more components? Check out our premium version.
-                        </div>
-                        <div class="d-grid">
-                            <a href="#" class="btn btn-primary">Upgrade to Pro</a>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </nav>
-        <!-- Navbar fragment End -->
-            
-        <!-- ✅ Scripts fragment (taruh sebelum </body> di tiap page) -->
+				<div class="sidebar-cta">
+					<div class="sidebar-cta-content">
+						<strong class="d-inline-block mb-2">Upgrade to Pro</strong>
+						<div class="mb-3 text-sm">
+							Are you looking for more components? Check out our premium version.
+						</div>
+						<div class="d-grid">
+							<a href="upgrade-to-pro.html" class="btn btn-primary">Upgrade to Pro</a>
+						</div>
+					</div>
+				</div>
+			</div>
+		</nav>
+        <!-- Sidebar fragment End -->
+        
+        <!-- Main Content Fragment Start : call with th:replace="~{fragments/layout :: content('METHOD')}" -->
+        <main th:fragment="content(method)" th:attr="data-method=${method}">
+
+        </main>
+        <!-- Main Content Fragment End -->      
+
+        <!-- Scripts fragment (place at end of each page) -->
         <div th:fragment="scripts(extraScripts)">
-            <!-- jQuery -->
             <script th:src="@{/js/jQuery_V3.7.1.min.js}"></script>
-
-            <!-- Bootstrap Bundle -->
             <script th:src="@{/bootstrap-5.3.8/js/bootstrap.bundle.min.js}"></script>
-
-            <!-- AdminKit JS -->
-            <script th:src="@{/Template/admin_kit_template/static/js/app.js}"></script>
-
-            <!-- Feather icons init (AdminKit biasanya pakai ini) -->
-            <script>
-                if (window.feather) { feather.replace(); }
-            </script>
-
             <!-- slot tambahan script per-page -->
-            <th:block th:if="${extraScripts != null}" th:replace="${extraScripts}"></th:block>
+            <th:block th:replace="${extraScripts} ?: ~{}"></th:block>
         </div>
-
     </body>
 </html>

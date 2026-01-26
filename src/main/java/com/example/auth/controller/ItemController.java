@@ -2,176 +2,97 @@ package com.example.auth.controller;
 
 import com.example.auth.model.Item;
 import com.example.auth.service.ItemService;
-import jakarta.servlet.http.HttpSession;
-
-import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
-import java.math.BigDecimal;
 import java.util.List;
-import java.util.Optional;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 @Controller
 public class ItemController {
-    
-    private static final Logger log = LoggerFactory.getLogger(ItemController.class);
 
-    private final ItemService itemService;
+    private final ItemService service;
 
-    public ItemController(ItemService itemService) {
-        this.itemService = itemService;
-    }
-
-    // Dropdown options (sesuai requirement)
-    private static final List<String> BUSINESS_UNITS = List.of(
-            "PT Mindo",
-            "PT Visiniaga",
-            "PT Primavisi",
-            "PT Bimoli",
-            "PT Transmoda"
-    );
-
-    private static final List<String> ITEM_TYPES = List.of(
-            "Finish Good",
-            "Spare Part",
-            "Raw Material",
-            "General Material",
-            "Sawn Timber",
-            "Fixed Asset",
-            "Waste Material"
-    );
-
-    private static void putFormOptions(Model model) {
-        model.addAttribute("businessUnits", BUSINESS_UNITS);
-        model.addAttribute("itemTypes", ITEM_TYPES);
-    }
-
-    private boolean isLoggedIn(HttpSession session) {
-        return session != null && session.getAttribute("userId") != null;
+    public ItemController(ItemService service) {
+        this.service = service;
     }
 
     @GetMapping("/items")
-    public String items(Model model, HttpSession session) {
-        if (!isLoggedIn(session)) return "redirect:/login";
+    public String items(Model model,
+                        @RequestParam(name = "page", defaultValue = "0") int page,
+                        @RequestParam(name = "size", defaultValue = "10") int size) {
 
-        /* if ("logout".equals(action)) {
-            session.invalidate();
-            return "redirect:/login";
-        }*/
+        if (size <= 0) size = 10;
+        if (page < 0) page = 0;
 
-        List<Item> items = itemService.listAll();
+        long totalElements = service.countAll();
+        int totalPages = (int) Math.ceil(totalElements / (double) size);
+        if (totalPages > 0 && page > totalPages - 1) page = totalPages - 1;
+
+        List<Item> items = service.getPage(page, size);
+
         model.addAttribute("items", items);
+        model.addAttribute("page", page);
+        model.addAttribute("size", size);
+        model.addAttribute("totalElements", totalElements);
+        model.addAttribute("totalPages", totalPages);
+        model.addAttribute("hasPrev", page > 0);
+        model.addAttribute("hasNext", totalPages > 0 && page < totalPages - 1);
+
         return "items";
     }
 
     @GetMapping("/items/new")
-    public String newItem(Model model, HttpSession session) {
-        if (!isLoggedIn(session)) return "redirect:/login";
-
+    public String newItemForm(Model model) {
         model.addAttribute("item", new Item());
-        model.addAttribute("mode", "create");
-        putFormOptions(model);
-        return "item_form";
+        return "item-form";
     }
 
     @PostMapping("/items")
-    public String createItem(
-            @RequestParam String code,
-            @RequestParam String description,
-            @RequestParam String itemType,
-            @RequestParam(required = false, defaultValue = "0") String stock,
-            @RequestParam(required = false) String note,
-            @RequestParam String businessUnit,
-            Model model,
-            HttpSession session
-    ) {
-        if (!isLoggedIn(session)) return "redirect:/login";
-
-        Item item = new Item();
-        item.setCode(code == null ? "" : code.trim());
-        item.setDescription(description == null ? "" : description.trim());
-        item.setItemType(itemType);
-        item.setStock(parseBigDecimalOrZero(stock));
-        item.setNote(note);
-        item.setBusinessUnit(businessUnit);
-        String username = String.valueOf(session.getAttribute("userName"));
-        String error = itemService.create(item, username);
-        if (error != null) {
-            model.addAttribute("error", error);
-            model.addAttribute("item", item);
-            model.addAttribute("mode", "create");
-            putFormOptions(model);
-            return "item_form";
+    public String saveItem(@ModelAttribute Item item, RedirectAttributes ra) {
+        try {
+            item.setCreatedBy("system"); // bisa diganti session user
+            service.save(item);
+            ra.addFlashAttribute("success", "Item saved successfully");
+        } catch (Exception e) {
+            ra.addFlashAttribute("error", "Failed to save item: " + e.getMessage());
         }
         return "redirect:/items";
     }
 
     @GetMapping("/items/{id}/edit")
-    public String editItem(@PathVariable Long id, Model model, HttpSession session) {
-        if (!isLoggedIn(session)) return "redirect:/login";
-
-        Optional<Item> itemOpt = itemService.getById(id);
-        if (itemOpt.isEmpty()) return "redirect:/items";
-
-        model.addAttribute("item", itemOpt.get());
-        model.addAttribute("mode", "edit");
-        putFormOptions(model);
-        return "item_form";
+    public String editItem(@PathVariable Long id, Model model, RedirectAttributes ra) {
+        try {
+            Item item = service.findById(id);
+            model.addAttribute("item", item);
+            return "item-form";
+        } catch (Exception e) {
+            ra.addFlashAttribute("error", "Item not found");
+            return "redirect:/items";
+        }
     }
 
     @PostMapping("/items/{id}")
-    public String updateItem(
-            @PathVariable Long id,
-            @RequestParam String description,
-            @RequestParam String itemType,
-            @RequestParam(required = false, defaultValue = "0") String stock,
-            @RequestParam(required = false) String note,
-            Model model,
-            HttpSession session
-    ) {
-        if (!isLoggedIn(session)) return "redirect:/login";
-
-        Optional<Item> itemOpt = itemService.getById(id);
-        if (itemOpt.isEmpty()) return "redirect:/items";
-
-        Item item = itemOpt.get();
-        item.setDescription(description == null ? "" : description.trim());
-        item.setItemType(itemType);
-        item.setStock(parseBigDecimalOrZero(stock));
-        item.setNote(note);
-        String username = String.valueOf(session.getAttribute("userName"));
-        String error = itemService.update(id, item, username);
-        if (error != null) {
-            model.addAttribute("error", error);
-            model.addAttribute("item", item);
-            model.addAttribute("mode", "edit");
-            putFormOptions(model);
-            return "item_form";
+    public String updateItem(@PathVariable Long id, @ModelAttribute Item item, RedirectAttributes ra) {
+        try {
+            item.setUpdatedBy("system");
+            service.update(id, item);
+            ra.addFlashAttribute("success", "Item updated successfully");
+        } catch (Exception e) {
+            ra.addFlashAttribute("error", "Failed to update item: " + e.getMessage());
         }
-
         return "redirect:/items";
     }
 
-    @GetMapping // Ini logger untuk debug saja
-    public String list(Model model) {
-        List<Item> items = itemService.listAll();
-        System.out.println("Items count = " + items.size());
-        log.info("Items count = {}", items.size());
-        model.addAttribute("items", items);
-        return "items";
-    }
-
-    private static BigDecimal parseBigDecimalOrZero(String input) {
+    @PostMapping("/items/{id}/delete")
+    public String deleteItem(@PathVariable Long id, RedirectAttributes ra) {
         try {
-            if (input == null || input.trim().isEmpty()) return BigDecimal.ZERO;
-            return new BigDecimal(input.trim());
-        } catch (Exception ex) {
-            return BigDecimal.ZERO;
+            service.delete(id);
+            ra.addFlashAttribute("success", "Item deleted successfully");
+        } catch (Exception e) {
+            ra.addFlashAttribute("error", "Failed to delete item: " + e.getMessage());
         }
+        return "redirect:/items";
     }
-
 }
