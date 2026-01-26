@@ -2,17 +2,25 @@ package com.example.auth.controller;
 
 import com.example.auth.model.Item;
 import com.example.auth.service.ItemService;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.util.List;
+import java.util.stream.IntStream;
 
 @Controller
 public class ItemController {
 
     private final ItemService service;
+
+    /**
+     * Default page size for pagination (can be configured in application.properties).
+     */
+    @Value("${app.pagination.page-size:10}")
+    private int defaultPageSize;
 
     public ItemController(ItemService service) {
         this.service = service;
@@ -21,24 +29,29 @@ public class ItemController {
     @GetMapping("/items")
     public String items(Model model,
                         @RequestParam(name = "page", defaultValue = "0") int page,
-                        @RequestParam(name = "size", defaultValue = "10") int size) {
+                        @RequestParam(name = "size", required = false) Integer size) {
 
-        if (size <= 0) size = 10;
+        int pageSize = (size == null || size <= 0) ? defaultPageSize : size;
         if (page < 0) page = 0;
 
         long totalElements = service.countAll();
-        int totalPages = (int) Math.ceil(totalElements / (double) size);
+        int totalPages = (int) Math.ceil(totalElements / (double) pageSize);
         if (totalPages > 0 && page > totalPages - 1) page = totalPages - 1;
 
-        List<Item> items = service.getPage(page, size);
+        List<Item> items = service.getPage(page, pageSize);
 
         model.addAttribute("items", items);
-        model.addAttribute("page", page);
-        model.addAttribute("size", size);
+        model.addAttribute("currentPage", page);
+        model.addAttribute("pageSize", pageSize);
         model.addAttribute("totalElements", totalElements);
         model.addAttribute("totalPages", totalPages);
         model.addAttribute("hasPrev", page > 0);
         model.addAttribute("hasNext", totalPages > 0 && page < totalPages - 1);
+
+        // Build list of page numbers for the UI (0-based index internally).
+        if (totalPages > 1) {
+            model.addAttribute("pageNumbers", IntStream.range(0, totalPages).boxed().toList());
+        }
 
         return "items";
     }
