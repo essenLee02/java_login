@@ -3,11 +3,11 @@
     <head th:replace="~{fragments/layout :: head('Item Master')}"></head>
 
     <body>
-        <form method="POST" action="/items">
             <div class="wrapper">
                 <!-- ✅ Sidebar dari layout -->
                 <div th:replace="~{fragments/layout :: sidebar}"></div>
 
+            <form method="POST" action="/items">
                 <!-- ✅ Struktur AdminKit: main/content -->
                 <div class="main">
                     <main class="content">
@@ -110,8 +110,8 @@
                         </div>
                     </main>
                 </div>
-            </div>
-        </form>
+            </form>
+        </div>
 
         <!-- Scripts Start -->
         <div th:replace="~{fragments/layout :: scripts(~{::extraScripts})}">

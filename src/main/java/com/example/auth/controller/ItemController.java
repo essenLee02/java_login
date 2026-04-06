@@ -2,6 +2,9 @@ package com.example.auth.controller;
 
 import com.example.auth.model.Item;
 import com.example.auth.service.ItemService;
+
+import jakarta.servlet.http.HttpSession;
+
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -27,9 +30,10 @@ public class ItemController {
     }
 
     @GetMapping("/items")
-    public String items(Model model,
-                        @RequestParam(name = "page", defaultValue = "0") int page,
-                        @RequestParam(name = "size", required = false) Integer size) {
+    public String items(Model model
+        , @RequestParam(name = "page", defaultValue = "0") int page
+        , @RequestParam(name = "size", required = false) Integer size
+    ) {
 
         int pageSize = (size == null || size <= 0) ? defaultPageSize : size;
         if (page < 0) page = 0;
@@ -63,9 +67,13 @@ public class ItemController {
     }
 
     @PostMapping("/items")
-    public String saveItem(@ModelAttribute Item item, RedirectAttributes ra) {
+    public String saveItem(@ModelAttribute Item item
+        , RedirectAttributes ra
+        , HttpSession session
+    ) {
         try {
-            item.setCreatedBy("system"); // bisa diganti session user
+            String userId = session.getAttribute("userId").toString();
+            item.setCreatedBy(userId); // bisa diganti session user
             service.save(item);
             ra.addFlashAttribute("success", "Item saved successfully");
         } catch (Exception e) {
@@ -107,5 +115,11 @@ public class ItemController {
             ra.addFlashAttribute("error", "Failed to delete item: " + e.getMessage());
         }
         return "redirect:/items";
+    }
+
+    @PostMapping("/items/logout")
+    public String logout(HttpSession session) {
+        session.invalidate();
+        return "redirect:/login";
     }
 }

@@ -1,0 +1,140 @@
+1. <tr th:each="it : ${items}">
+
+➡️ items berasal dari Model yang dikirim oleh Controller,
+bukan dipanggil langsung dari HTML.
+
+HTML hanya menerima data, tidak pernah memanggil listAll().
+
+2. Alur besar (high level)
+Browser → Controller → Service → Repository → Database
+                           ↓
+                        Model (items)
+                           ↓
+                      Thymeleaf HTML
+3. Step-by-step detail (yang sebenarnya terjadi)
+🔹 Step 1 — User akses URL
+User buka browser: http://localhost:8080/items
+
+🔹 Step 2 — Spring mencari Controller yang cocok
+Di ItemController biasanya ada:
+@Controller
+@RequestMapping("/items")
+public class ItemController {
+
+    private final ItemService service;
+
+    public ItemController(ItemService service) {
+        this.service = service;
+    }
+
+    @GetMapping
+    public String list(Model model) {
+        model.addAttribute("items", service.listAll());
+        return "items"; // items.html
+    }
+}
+
+3. Step 3 — Controller memanggil Service
+Di sini: service.listAll()
+
+   }
+}
+
+➡️ Ini kunci utamanya
+🔹 Step 3 — Controller memanggil Service
+
+Di sini:
+
+service.listAll()
+
+🔹 Step 4 — Service memanggil Repository
+@Service
+public class ItemService {
+
+    private final ItemRepository repo;
+
+    public ItemService(ItemRepository repo) {
+        this.repo = repo;
+    }
+
+    public List<Item> listAll() {
+        return repo.findAll();
+    }
+}
+
+🔹 Step 5 — Repository ambil data dari database
+public interface ItemRepository extends JpaRepository<Item, Long> {
+}
+➡️ findAll() otomatis generate SQL:
+SELECT * FROM items;
+
+Step 6 — Data kembali ke Controller
+
+Controller menerima hasilnya: List<Item> items = service.listAll();
+
+List<Item> items = service.listAll();
+
+Lalu dimasukkan ke Model:
+model.addAttribute("items", items);
+
+📌 Model = “koper data” yang dibawa ke HTML
+
+🔹 Step 7 — Thymeleaf render HTML
+
+Controller return: return "items";
+
+Spring akan: src/main/resources/templates/items.html
+
+🔹 Step 8 — Thymeleaf membaca Model
+
+Di HTML: <tr th:each="it : ${items}">
+
+Artinya:
+-> ${items} → data dari model.addAttribute("items", ...)
+-> it → 1 baris Item
+
+🔹 Step 9 — Akses field Item
+
+Kalau Item class:
+public class Item {
+    private Long id;
+    private String code;
+    private BigDecimal stock;
+}
+
+Di HTML:
+<td th:text="${it.code}"></td>
+<td th:text="${it.stock}"></td>
+
+➡️ Thymeleaf memanggil getter otomatis:
+it.getCode()
+it.getStock()
+
+4️. Kenapa HTML tidak bisa langsung panggil listAll()?
+
+Karena:
+
+❌ HTML / Thymeleaf bukan Java runtime
+❌ HTML hanya renderer (view)
+❌ Tidak boleh ada logic bisnis di view
+
+📌 Prinsip MVC:
+
+Model → data
+
+View → tampilan
+
+Controller → penghubung
+
+5. Ringkasan super singkat
+HTML (th:each)
+  ↑
+Model (items)
+  ↑
+Controller (@GetMapping)
+  ↑
+Service (listAll)
+  ↑
+Repository (findAll)
+  ↑
+Database
