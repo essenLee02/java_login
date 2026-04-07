@@ -2,15 +2,18 @@ package com.example.auth.controller;
 
 import com.example.auth.model.Item;
 import com.example.auth.service.ItemService;
-
 import jakarta.servlet.http.HttpSession;
-
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
+import java.util.Arrays;
 import java.util.List;
 import java.util.stream.IntStream;
 
@@ -19,39 +22,37 @@ public class ItemController {
 
     private final ItemService service;
 
-    /**
-     * Default page size for pagination (can be configured in application.properties).
-     */
     @Value("${app.pagination.page-size:10}")
     private int defaultPageSize;
+
+    @Value("${app.location:Page_Components}")
+    private String appLocation;
 
     public ItemController(ItemService service) {
         this.service = service;
     }
 
-// Dropdown options (sesuai requirement)
-    private static final List<String> BUSINESS_UNITS = List.of(
-            "PT Mindo",
-            "PT Visiniaga",
-            "PT Primavisi",
-            "PT Bimoli",
-            "PT Transmoda"
-    );
+    @ModelAttribute("businessUnits")
+    public List<String> businessUnits() {
+        return Arrays.asList(
+                "PT Mindo",
+                "PT Visiniaga",
+                "PT Primavisi",
+                "PT Bimoli",
+                "PT Transmoda"
+        );
+    }
 
-    private static final List<String> ITEM_TYPES = List.of(
-            "Raw Material",
-            "General Material",
-            "Spare Part",
-            "Finish Good",
-            "Fixed Asset",
-            "Waste Material",
-            "Sawn Timber",
-            "Logs"
-    );
-    
-    private static void putFormOptions(Model model) {
-        model.addAttribute("businessUnits", BUSINESS_UNITS);
-        model.addAttribute("itemTypes", ITEM_TYPES);
+    @ModelAttribute("itemTypes")
+    public List<String> itemTypes() {
+        return Arrays.asList(
+                "Raw Material",
+                "General Material",
+                "Spare Part",
+                "Finish Goods",
+                "Fixed Assets",
+                "Logs"
+        );
     }
 
     private boolean isLoggedIn(HttpSession session) {
@@ -59,19 +60,27 @@ public class ItemController {
     }
 
     @GetMapping("/items")
-    public String items(Model model
-        , @RequestParam(name = "page", defaultValue = "0") int page
-        , @RequestParam(name = "size", required = false) Integer size
-        , HttpSession session
+    public String items(
+            Model model,
+            @RequestParam(name = "page", defaultValue = "0") int page,
+            @RequestParam(name = "size", required = false) Integer size,
+            HttpSession session
     ) {
-        if (!isLoggedIn(session)) return "redirect:/login";
+        if (!isLoggedIn(session)) {
+            return "redirect:/login";
+        }
 
         int pageSize = (size == null || size <= 0) ? defaultPageSize : size;
-        if (page < 0) page = 0;
+        if (page < 0) {
+            page = 0;
+        }
 
         long totalElements = service.countAll();
         int totalPages = (int) Math.ceil(totalElements / (double) pageSize);
-        if (totalPages > 0 && page > totalPages - 1) page = totalPages - 1;
+
+        if (totalPages > 0 && page > totalPages - 1) {
+            page = totalPages - 1;
+        }
 
         List<Item> items = service.getPage(page, pageSize);
 
@@ -83,79 +92,89 @@ public class ItemController {
         model.addAttribute("hasPrev", page > 0);
         model.addAttribute("hasNext", totalPages > 0 && page < totalPages - 1);
 
-        // Build list of page numbers for the UI (0-based index internally).
         if (totalPages > 1) {
             model.addAttribute("pageNumbers", IntStream.range(0, totalPages).boxed().toList());
         }
 
-        return "items";
+        return appLocation + "/ItemMaster/items";
     }
 
     @GetMapping("/items/new")
-    public String newItemForm(
-        Model model
-        , HttpSession session
-    ) {
-        if (!isLoggedIn(session)) return "redirect:/login";
-
-        model.addAttribute("item", new Item());
-        model.addAttribute("mode", "new");
-        putFormOptions(model);
-
-        return "item-form";
-    }
-
-    @PostMapping("/items")
-    public String saveItem(
-        @ModelAttribute Item item
-        , RedirectAttributes ra
-        , HttpSession session
-    ) {
-        if (!isLoggedIn(session)) return "redirect:/login";
-
-        try {
-            String userId = session.getAttribute("userId").toString();
-            item.setCreatedBy(userId); // bisa diganti session user
-            service.save(item);
-            ra.addFlashAttribute("success", "Item saved successfully");
-        } catch (Exception e) {
-            ra.addFlashAttribute("error", "Failed to save item: " + e.getMessage());
+    public String newItemForm(Model model, HttpSession session) {
+        if (!isLoggedIn(session)) {
+            return "redirect:/login";
         }
-        return "redirect:/items";
+
+        model.addAttribute("item", new com.example.auth.model.Item());
+        model.addAttribute("mode", "new");
+
+        return appLocation + "/ItemMaster/item-form";
     }
 
     @GetMapping("/items/{id}/edit")
-    public String editItem(@PathVariable Long id, Model model, RedirectAttributes ra) {
+    public String editItem(
+            @PathVariable Long id,
+            Model model,
+            RedirectAttributes ra,
+            HttpSession session
+    ) {
         try {
+            if (!isLoggedIn(session)) {
+                return "redirect:/login";
+            }
+
             Item item = service.findById(id);
-            
             model.addAttribute("item", item);
             model.addAttribute("mode", "edit");
-            putFormOptions(model);
 
-            return "item-form";
+            return appLocation + "/ItemMaster/item-form";
         } catch (Exception e) {
             ra.addFlashAttribute("error", "Item not found");
             return "redirect:/items";
         }
     }
 
-    @PostMapping("/items/{id}")
-    public String updateItem(
-        @PathVariable Long id
-        , @ModelAttribute Item item
-        , RedirectAttributes ra
-        , HttpSession session
+    @PostMapping("/items")
+    public String saveItem(
+            @ModelAttribute Item item,
+            RedirectAttributes ra,
+            HttpSession session
     ) {
         try {
-            String userName = session.getAttribute("userName").toString();
+            Object userIdObj = session.getAttribute("userId");
+            if (userIdObj == null) {
+                return "redirect:/login";
+            }
 
-            item.setUpdatedBy(userName); // bisa diganti session user
+            item.setCreatedBy(userIdObj.toString());
+            service.save(item);
+            ra.addFlashAttribute("success", "Item saved successfully");
+        } catch (Exception e) {
+            ra.addFlashAttribute("error", "Failed to save item: " + e.getMessage());
+        }
+
+        return "redirect:/items";
+    }
+
+    @PostMapping("/items/{id}")
+    public String updateItem(
+            @PathVariable Long id,
+            @ModelAttribute Item item,
+            RedirectAttributes ra,
+            HttpSession session
+    ) {
+        try {
+            if (!isLoggedIn(session)) {
+                return "redirect:/login";
+            }
+
+            item.setUpdatedBy(session.getAttribute("userId").toString());
             service.update(id, item);
             ra.addFlashAttribute("success", "Item updated successfully");
         } catch (Exception e) {
             ra.addFlashAttribute("error", "Failed to update item: " + e.getMessage());
         }
+
         return "redirect:/items";
     }
 
@@ -167,7 +186,13 @@ public class ItemController {
         } catch (Exception e) {
             ra.addFlashAttribute("error", "Failed to delete item: " + e.getMessage());
         }
+
         return "redirect:/items";
     }
-    // End
+
+    @PostMapping("/items/logout")
+    public String logout(HttpSession session) {
+        session.invalidate();
+        return "redirect:/login";
+    }
 }
