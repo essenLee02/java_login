@@ -54,7 +54,7 @@ public class ItemRepository {
         int offset = page * size;
         String sql = """
             SELECT * FROM items
-            ORDER BY id DESC
+            ORDER BY code ASC
             LIMIT ? OFFSET ?
         """;
         return jdbcTemplate.query(sql, rowMapper, size, offset);
@@ -114,7 +114,7 @@ public class ItemRepository {
     }
 
     public Item findById(Long id) {
-        String sql = "SELECT * FROM items WHERE id = ?";
+        String sql = "SELECT * FROM items WHERE id = ? ORDER BY code ASC";
         return jdbcTemplate.queryForObject(sql, rowMapper, id);
     }
 }

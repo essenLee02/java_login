@@ -92,7 +92,10 @@ public class ItemController {
     }
 
     @GetMapping("/items/new")
-    public String newItemForm(Model model, HttpSession session) {
+    public String newItemForm(
+        Model model
+        , HttpSession session
+    ) {
         if (!isLoggedIn(session)) return "redirect:/login";
 
         model.addAttribute("item", new Item());
@@ -142,9 +145,12 @@ public class ItemController {
         @PathVariable Long id
         , @ModelAttribute Item item
         , RedirectAttributes ra
+        , HttpSession session
     ) {
         try {
-            item.setUpdatedBy("system");
+            String userName = session.getAttribute("userName").toString();
+
+            item.setUpdatedBy(userName); // bisa diganti session user
             service.update(id, item);
             ra.addFlashAttribute("success", "Item updated successfully");
         } catch (Exception e) {

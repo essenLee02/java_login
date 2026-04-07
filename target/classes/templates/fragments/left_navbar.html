@@ -1,0 +1,59 @@
+<!doctype html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+    <body>
+        <nav id="sidebar" class="sidebar js-sidebar" th:fragment="left_navbar">
+            <div class="sidebar-content js-simplebar">
+                <a class="sidebar-brand" th:href="@{/dashboard}">
+                    <span class="align-middle" th:text="${session.userName} ?: 'Auth Demo'">Auth Demo</span>
+                </a>
+
+                <ul class="sidebar-nav">
+                    <li class="sidebar-header">
+                        Pages
+                    </li>
+
+                    <li class="sidebar-item">
+                        <a class="sidebar-link" th:href="@{/dashboard}">
+                            <i class="align-middle" data-feather="sliders"></i>
+                            <span class="align-middle">Dashboard</span>
+                        </a>
+                    </li>
+
+                    <li class="sidebar-item">
+                        <a class="sidebar-link" th:href="@{/items}">
+                            <i class="align-middle" data-feather="box"></i>
+                            <span class="align-middle">Items</span>
+                        </a>
+                    </li>
+
+                    <li class="sidebar-item">
+                        <a class="sidebar-link" th:href="@{/profile}">
+                            <i class="align-middle" data-feather="user"></i>
+                            <span class="align-middle">Profile</span>
+                        </a>
+                    </li>
+
+                    <li class="sidebar-item">
+                        <form th:action="@{/logout}" method="post" class="px-3 py-2">
+                            <button type="submit" class="btn btn-outline-light btn-sm w-100">
+                                Logout
+                            </button>
+                        </form>
+                    </li>
+                </ul>
+
+                <div class="sidebar-cta">
+                    <div class="sidebar-cta-content">
+                        <strong class="d-inline-block mb-2">Upgrade to Pro</strong>
+                        <div class="mb-3 text-sm">
+                            Are you looking for more components? Check out our premium version.
+                        </div>
+                        <div class="d-grid">
+                            <a th:href="@{/upgrade-to-pro}" class="btn btn-primary">Upgrade to Pro</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </nav>
+    </body>
+</html>

@@ -1,101 +1,133 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org">
-  <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Item Master</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
-  </head>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+    <head th:replace="~{fragments/layout :: head('Item Master')}"></head>
 
-  <body>
-    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
-        <div class="container">
-            <a class="navbar-brand" href="/dashboard" th:text="${session.userName}">
-                Auth Demo
-            </a>
-            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#nav" aria-controls="nav" aria-expanded="false" aria-label="Toggle navigation">
-                <span class="navbar-toggler-icon"></span>
-            </button>
-            <div class="collapse navbar-collapse" id="nav">
-                <ul class="navbar-nav me-auto">
-                    <li class="nav-item"><a class="nav-link" href="/items">Item Master</a></li>
-                </ul>
-                <div class="d-flex">
-                    <form action="/logout" method="post" class="d-inline">
-                        <button type="submit" class="btn btn-outline-light btn-sm">Logout</button>
-                    </form>
+    <body>
+        <div class="wrapper">
+            <!-- ✅ Sidebar dari layout -->
+            <div th:replace="~{fragments/layout :: sidebar}"></div>
+
+            <form method="POST" action="/items">
+                <!-- ✅ Struktur AdminKit: main/content -->
+                <div class="main">
+                    <main class="content">
+                        <div class="container-fluid p-0">
+
+                            <div class="d-flex justify-content-between align-items-center mb-3">
+                                <div>
+                                    <h3 class="mb-0">Item Master</h3>
+                                    <div class="text-muted">Manage items (unique by <b>Code + Business Unit</b>)</div>
+                                </div>
+                                <a class="btn btn-primary" href="/items/new">+ New Item</a>
+                            </div>
+
+                            <div th:if="${success}" class="alert alert-success" th:text="${success}"></div>
+                            <div th:if="${error}" class="alert alert-danger" th:text="${error}"></div>
+
+                            <div class="card">
+                                <div class="card-body">
+                                    <div class="table-responsive">
+                                        <table class="table table-sm table-striped align-middle">
+                                            <thead class="table-light">
+                                            <tr>
+                                                <th style="width:80px">ID</th>
+                                                <th>Code</th>
+                                                <th>Description</th>
+                                                <th>Type</th>
+                                                <th class="text-end">Stock</th>
+                                                <th>Business Unit</th>
+                                                <th>Created</th>
+                                                <th>Updated</th>
+                                                <th style="width:110px">Action</th>
+                                            </tr>
+                                            </thead>
+                                            <tbody>
+                                            <tr th:each="it : ${items}"
+                                                th:with="
+                                                    hasUpdate=${it.updatedAt != null},
+                                                    displayDate=${hasUpdate ? it.updatedAt : it.createdAt},
+                                                    displayUser=${hasUpdate ? it.updatedBy : it.createdBy}
+                                                ">
+                                                <td th:text="${it.id}"></td>
+                                                <td th:text="${it.code}"></td>
+                                                <td th:text="${it.description}"></td>
+                                                <td th:text="${it.itemType}"></td>
+                                                <td class="text-end" th:text="${it.stock}"></td>
+                                                <td th:text="${it.businessUnit}"></td>
+
+                                                <td>
+                                                    <div class="small" th:text="${it.createdAt}"></div>
+                                                    <div class="small text-muted" th:text="${it.createdBy}"></div>
+                                                </td>
+
+                                                <td>
+                                                    <div class="small"
+                                                        th:text="${displayDate}"
+                                                        th:classappend="${hasUpdate} ? ' text-primary' : ''"></div>
+                                                    <div class="small text-muted" th:text="${displayUser}"></div>
+                                                </td>
+
+                                                <td>
+                                                    <a class="btn btn-outline-secondary btn-sm"
+                                                        th:href="@{/items/{id}/edit(id=${it.id})}">
+                                                        Edit
+                                                    </a>
+                                                </td>
+                                            </tr>
+
+                                            <tr th:if="${#lists.isEmpty(items)}">
+                                                <td colspan="9" class="text-center text-muted py-4">No items yet.</td>
+                                            </tr>
+                                            </tbody>
+                                        </table>
+                                        <!-- Pagination Start (page index is 0-based in backend) -->
+                                        <nav aria-label="Items pagination" class="mt-3" th:if="${totalPages != null and totalPages > 1}">
+                                            <ul class="pagination justify-content-center mb-0">
+                                                <li class="page-item" th:classappend="${!hasPrev} ? ' disabled'">
+                                                    <a class="page-link" th:href="@{/items(page=${currentPage-1})}" aria-label="Previous">
+                                                        <span aria-hidden="true">&laquo;</span>
+                                                    </a>
+                                                </li>
+
+                                                <li class="page-item"
+                                                    th:each="p : ${pageNumbers}"
+                                                    th:classappend="${p == currentPage} ? ' active'">
+                                                    <a class="page-link" th:href="@{/items(page=${p})}" th:text="${p + 1}">1</a>
+                                                </li>
+
+                                                <li class="page-item" th:classappend="${!hasNext} ? ' disabled'">
+                                                    <a class="page-link" th:href="@{/items(page=${currentPage+1})}" aria-label="Next">
+                                                        <span aria-hidden="true">&raquo;</span>
+                                                    </a>
+                                                </li>
+                                            </ul>
+                                        </nav>
+                                        <!-- Pagination End -->
+                                    </div>
+                                </div>
+                            </div>
+
+                        </div>
+                    </main>
                 </div>
-            </div>
+            </form>
         </div>
-    </nav>
 
-    <div class="container py-4">
-      <div class="d-flex justify-content-between align-items-center mb-3">
-        <div>
-          <h3 class="mb-0">Item Master</h3>
-          <div class="text-muted">Manage items (unique by <b>Code + Business Unit</b>)</div>
+        <!-- Scripts Start -->
+        <div th:replace="~{fragments/layout :: scripts(~{::extraScripts})}">
+            <th:block th:fragment="extraScripts">
+                <!-- contoh tambahan script (kalau file-nya memang ada) -->
+                <script th:src="@{/Template/toast/toastr.min.js}"></script>
+                <script th:src="@{/Function_Path/function_form.js}"></script>
+                <script th:src="@{/Function_Path/function_work.js}"></script>
+                <script>
+                    $(document).ready(() => {
+                        console.log('items page loaded');
+                        toastr.success('items page loaded', 'Successfully');
+                    });
+                </script>
+            </th:block>
         </div>
-        <a class="btn btn-primary" href="/items/new">+ New Item</a>
-      </div>
-
-      <div th:if="${success}" class="alert alert-success" th:text="${success}"></div>
-      <div th:if="${error}" class="alert alert-danger" th:text="${error}"></div>
-
-      <div class="table-responsive">
-        <table class="table table-sm table-striped align-middle">
-          <thead class="table-light">
-          <tr>
-            <th style="width:80px">ID</th>
-            <th>Code</th>
-            <th>Description</th>
-            <th>Type</th>
-            <th class="text-end">Stock</th>
-            <th>Business Unit</th>
-            <th>Created</th>
-            <th>Updated</th>
-            <th style="width:110px">Action</th>
-          </tr>
-          </thead>
-          <tbody>
-          <tr th:each="it : ${items}"
-              th:with="
-                hasUpdate=${it.updatedAt != null and #strings.trim(it.updatedAt.toString()) != ''},
-                displayDate=${hasUpdate ? it.updatedAt : it.createdAt},
-                displayUser=${hasUpdate ? it.updatedBy : it.createdBy}
-              ">
-            <td th:text="${it.id}"></td>
-            <td th:text="${it.code}"></td>
-            <td th:text="${it.description}"></td>
-            <td th:text="${it.itemType}"></td>
-            <td class="text-end" th:text="${it.stock}"></td>
-            <td th:text="${it.businessUnit}"></td>
-
-            <td>
-              <div class="small" th:text="${it.createdAt}"></div>
-              <div class="small text-muted" th:text="${it.createdBy}"></div>
-            </td>
-
-            <!-- UPDATED: kalau belum pernah update, pakai create date/user -->
-            <td>
-              <div class="small"
-                   th:text="${displayDate}"
-                   th:classappend="${hasUpdate} ? ' text-primary' : ''">
-              </div>
-              <div class="small text-muted" th:text="${displayUser}"></div>
-            </td>
-
-            <td>
-              <a class="btn btn-outline-secondary btn-sm" th:href="@{'/items/' + ${it.id} + '/edit'}">Edit</a>
-            </td>
-          </tr>
-
-          <tr th:if="${#lists.isEmpty(items)}">
-            <td colspan="9" class="text-center text-muted py-4">No items yet.</td>
-          </tr>
-          </tbody>
-        </table>
-      </div>
-    </div>
-
-  </body>
+        <!-- Scripts End -->
+    </body>
 </html>

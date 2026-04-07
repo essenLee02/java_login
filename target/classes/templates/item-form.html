@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+    <head th:replace="~{fragments/layout :: head(${mode} == 'edit' ? 'Edit Item' : 'New Item')}"></head>
+
+    <body>
+        <div class="wrapper">
+            <!-- ✅ Sidebar dari layout -->
+            <div th:replace="~{fragments/layout :: sidebar}"></div>
+
+            <div class="main">
+                <main class="content">
+                    <div class="container-fluid p-0" style="max-width: 840px;">
+                        <div class="d-flex justify-content-between align-items-center mb-3">
+                            <div>
+                                <h3 class="mb-0" th:text="${mode} == 'edit' ? 'Edit Item' : 'New Item'">New Item</h3>
+                                <div class="text-muted">Create or update item master</div>
+                            </div>
+                            <a class="btn btn-outline-secondary" th:href="@{/items}">Back</a>
+                        </div>
+
+                        <div th:if="${error}" class="alert alert-danger" th:text="${error}"></div>
+                        <div th:if="${success}" class="alert alert-success" th:text="${success}"></div>
+
+                        <div class="card">
+                            <div class="card-body">
+                                <form th:action="${mode} == 'edit' ? @{/items/{id}(id=${item.id})} : @{/items}" method="post" class="row g-3">
+                                    <div class="col-md-6">
+                                        <label class="form-label">Code</label>
+                                        <input name="code" type="text" class="form-control" th:value="${item.code}" required maxlength="100">
+                                        <div class="form-text">Unique by <b>Code + Business Unit</b>.</div>
+                                    </div>
+
+                                    <div class="col-md-6">
+                                        <label class="form-label">Business Unit</label>
+                                        <select name="businessUnit" class="form-select" required>
+                                            <option value="" disabled th:selected="${item.businessUnit} == null">Select BU</option>
+                                            <option th:each="bu : ${businessUnits}" th:value="${bu}" th:text="${bu}" th:selected="${bu} == ${item.businessUnit}"></option>
+                                        </select>
+                                    </div>
+
+                                    <div class="col-12">
+                                        <label class="form-label">Description</label>
+                                        <input name="description" type="text" class="form-control" th:value="${item.description}" required maxlength="255">
+                                    </div>
+
+                                    <div class="col-md-6">
+                                        <label class="form-label">Item Type</label>
+                                        <select name="itemType" class="form-select" required>
+                                            <option value="" disabled th:selected="${item.itemType} == null">Select type</option>
+                                            <option th:each="t : ${itemTypes}" th:value="${t}" th:text="${t}" th:selected="${t} == ${item.itemType}"></option>
+                                        </select>
+                                    </div>
+
+                                    <div class="col-md-6">
+                                        <label class="form-label">Stock</label>
+                                        <input name="stock" id="stock" type="text" autocomplete="off" class="form-control" th:value="${item.stock}">
+                                    </div>
+
+                                    <div class="col-12">
+                                        <label class="form-label">Note</label>
+                                        <textarea name="note" class="form-control" rows="4" th:text="${item.note}"></textarea>
+                                    </div>
+
+                                    <div class="col-12 d-flex gap-2">
+                                        <button type="submit" class="btn btn-primary" th:text="${mode} == 'edit' ? 'Save Changes' : 'Create Item'">Create Item</button>
+                                        <a class="btn btn-outline-secondary" th:href="@{/items}">Cancel</a>
+                                    </div>
+                                </form>
+
+                                <hr class="my-4" th:if="${mode} == 'edit'">
+                                <div class="small text-muted" th:if="${mode} == 'edit'">
+                                    <div>Created: <span th:text="${item.createdAt}"></span> by <span th:text="${item.createdBy}"></span></div>
+                                    <div>Updated: <span th:text="${item.updatedAt}"></span> by <span th:text="${item.updatedBy}"></span></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </main>
+            </div>
+        </div>
+
+        <!-- Scripts Start -->
+        <div th:replace="~{fragments/layout :: scripts(~{::extraScripts})}">
+            <th:block th:fragment="extraScripts">
+                <!-- contoh tambahan script (kalau file-nya memang ada) -->
+                <script th:src="@{/Template/toast/toastr.min.js}"></script>
+                <script th:src="@{/Function_Path/function_form.js}"></script>
+                <script th:src="@{/Function_Path/function_work.js}"></script>
+                <script>
+                    $(function () {
+                        $('#stock').on('input', function () {
+                            let v = $(this).val();
+                            v = v.replace(/[^0-9.]/g, '').replace(/(\..*)\./g, '$1');
+
+                            const parts = v.split('.');
+                            if (parts.length > 2) {
+                                v = parts.shift() + '.' + parts.join('');
+                            }
+
+                            if (v.startsWith('.')) {
+                                v = '0' + v;
+                            }
+
+                            $(this).val(v);
+                        });
+                    });
+                </script>
+            </th:block>
+        </div>
+        <!-- Scripts End -->
+    </body>
+</html>
