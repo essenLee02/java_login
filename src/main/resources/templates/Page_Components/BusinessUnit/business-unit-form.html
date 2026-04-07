@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+    <head th:replace="~{fragments/layout :: head(${mode} == 'edit' ? 'Edit Business Unit' : 'New Business Unit')}"></head>
+
+    <body>
+        <div class="wrapper">
+            <div th:replace="~{fragments/layout :: sidebar}"></div>
+
+            <div class="main">
+                <div th:replace="~{fragments/layout :: sidebar_header}"></div>
+
+                <main class="content">
+                    <div class="container-fluid p-0" style="max-width: 1100px;">
+                        <div class="d-flex justify-content-between align-items-center mb-3">
+                            <div>
+                                <h3 class="mb-0" th:text="${mode} == 'edit' ? 'Edit Business Unit' : 'New Business Unit'">Business Unit</h3>
+                                <div class="text-muted">Create or update Business Unit master</div>
+                            </div>
+                            <a class="btn btn-outline-secondary" th:href="@{/business-units}">Back</a>
+                        </div>
+
+                        <div th:if="${error}" class="alert alert-danger" th:text="${error}"></div>
+                        <div th:if="${success}" class="alert alert-success" th:text="${success}"></div>
+
+                        <div class="card">
+                            <div class="card-body">
+                                <form th:action="${mode} == 'edit' ? @{/business-units/{id}(id=${businessUnit.id})} : @{/business-units}"
+                                    method="post"
+                                    class="row g-3">
+
+                                    <div class="col-md-4">
+                                        <label class="form-label">Code</label>
+                                        <input type="text" name="code" class="form-control" th:value="${businessUnit.code}" required>
+                                    </div>
+
+                                    <div class="col-md-6">
+                                        <label class="form-label">Name</label>
+                                        <input type="text" name="name" class="form-control" th:value="${businessUnit.name}" required>
+                                    </div>
+
+                                    <div class="col-md-6">
+                                        <label class="form-label">Address</label>
+                                        <input type="text" name="address" class="form-control" th:value="${businessUnit.address}">
+                                    </div>
+
+                                    <div class="col-md-4">
+                                        <label class="form-label">ID Country</label>
+                                        <input type="text" name="idCountry" class="form-control" th:value="${businessUnit.idCountry}">
+                                    </div>
+
+                                    <div class="col-md-4">
+                                        <label class="form-label">ID Province</label>
+                                        <input type="text" name="idProvince" class="form-control" th:value="${businessUnit.idProvince}">
+                                    </div>
+
+                                    <div class="col-md-4">
+                                        <label class="form-label">ID City</label>
+                                        <input type="text" name="idCity" class="form-control" th:value="${businessUnit.idCity}">
+                                    </div>
+
+                                    <div class="col-md-4">
+                                        <label class="form-label">Tax Number</label>
+                                        <input type="text" name="taxNumber" class="form-control" th:value="${businessUnit.taxNumber}">
+                                    </div>
+
+                                    <div class="col-md-4">
+                                        <label class="form-label">Email</label>
+                                        <input type="email" name="email" class="form-control" th:value="${businessUnit.email}">
+                                    </div>
+
+                                    <div class="col-md-4">
+                                        <label class="form-label">Phone Number</label>
+                                        <input type="text" name="phoneNumber" class="form-control" th:value="${businessUnit.phoneNumber}">
+                                    </div>
+
+                                    <div class="col-md-3">
+                                        <label class="form-label">Status</label>
+                                        <select name="status" class="form-select" required>
+                                            <option th:value="1" th:selected="${businessUnit.status == 1}">Active</option>
+                                            <option th:value="0" th:selected="${businessUnit.status == 0}">Inactive</option>
+                                        </select>
+                                    </div>
+
+                                    <div class="col-12 d-flex gap-2 mt-3">
+                                        <button type="submit"
+                                                class="btn btn-primary"
+                                                th:text="${mode} == 'edit' ? 'Save Changes' : 'Create Business Unit'">
+                                            Save
+                                        </button>
+                                        <a class="btn btn-outline-secondary" th:href="@{/business-units}">Cancel</a>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </main>
+            </div>
+        </div>
+
+        <!-- Scripts Start -->
+        <div th:replace="~{fragments/layout :: scripts(~{::extraScripts})}">
+            <th:block th:fragment="extraScripts">
+                <!-- contoh tambahan script (kalau file-nya memang ada) -->
+                <script th:src="@{/Template/toast/toastr.min.js}"></script>
+                <script th:src="@{/Function_Path/function_form.js}"></script>
+                <script th:src="@{/Function_Path/function_work.js}"></script>
+                <script>
+                    $(function () {
+                        $('#stock').on('input', function () {
+                            let v = $(this).val();
+                            v = v.replace(/[^0-9.]/g, '').replace(/(\..*)\./g, '$1');
+
+                            const parts = v.split('.');
+                            if (parts.length > 2) {
+                                v = parts.shift() + '.' + parts.join('');
+                            }
+
+                            if (v.startsWith('.')) {
+                                v = '0' + v;
+                            }
+
+                            $(this).val(v);
+                        });
+                    });
+                </script>
+            </th:block>
+        </div>
+        <!-- Scripts End -->
+    </body>
+</html>
