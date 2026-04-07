@@ -29,11 +29,42 @@ public class ItemController {
         this.service = service;
     }
 
+// Dropdown options (sesuai requirement)
+    private static final List<String> BUSINESS_UNITS = List.of(
+            "PT Mindo",
+            "PT Visiniaga",
+            "PT Primavisi",
+            "PT Bimoli",
+            "PT Transmoda"
+    );
+
+    private static final List<String> ITEM_TYPES = List.of(
+            "Raw Material",
+            "General Material",
+            "Spare Part",
+            "Finish Good",
+            "Fixed Asset",
+            "Waste Material",
+            "Sawn Timber",
+            "Logs"
+    );
+    
+    private static void putFormOptions(Model model) {
+        model.addAttribute("businessUnits", BUSINESS_UNITS);
+        model.addAttribute("itemTypes", ITEM_TYPES);
+    }
+
+    private boolean isLoggedIn(HttpSession session) {
+        return session != null && session.getAttribute("userId") != null;
+    }
+
     @GetMapping("/items")
     public String items(Model model
         , @RequestParam(name = "page", defaultValue = "0") int page
         , @RequestParam(name = "size", required = false) Integer size
+        , HttpSession session
     ) {
+        if (!isLoggedIn(session)) return "redirect:/login";
 
         int pageSize = (size == null || size <= 0) ? defaultPageSize : size;
         if (page < 0) page = 0;
@@ -61,16 +92,24 @@ public class ItemController {
     }
 
     @GetMapping("/items/new")
-    public String newItemForm(Model model) {
+    public String newItemForm(Model model, HttpSession session) {
+        if (!isLoggedIn(session)) return "redirect:/login";
+
         model.addAttribute("item", new Item());
+        model.addAttribute("mode", "new");
+        putFormOptions(model);
+
         return "item-form";
     }
 
     @PostMapping("/items")
-    public String saveItem(@ModelAttribute Item item
+    public String saveItem(
+        @ModelAttribute Item item
         , RedirectAttributes ra
         , HttpSession session
     ) {
+        if (!isLoggedIn(session)) return "redirect:/login";
+
         try {
             String userId = session.getAttribute("userId").toString();
             item.setCreatedBy(userId); // bisa diganti session user
@@ -86,7 +125,11 @@ public class ItemController {
     public String editItem(@PathVariable Long id, Model model, RedirectAttributes ra) {
         try {
             Item item = service.findById(id);
+            
             model.addAttribute("item", item);
+            model.addAttribute("mode", "edit");
+            putFormOptions(model);
+
             return "item-form";
         } catch (Exception e) {
             ra.addFlashAttribute("error", "Item not found");
@@ -95,7 +138,11 @@ public class ItemController {
     }
 
     @PostMapping("/items/{id}")
-    public String updateItem(@PathVariable Long id, @ModelAttribute Item item, RedirectAttributes ra) {
+    public String updateItem(
+        @PathVariable Long id
+        , @ModelAttribute Item item
+        , RedirectAttributes ra
+    ) {
         try {
             item.setUpdatedBy("system");
             service.update(id, item);
@@ -116,10 +163,5 @@ public class ItemController {
         }
         return "redirect:/items";
     }
-
-    @PostMapping("/items/logout")
-    public String logout(HttpSession session) {
-        session.invalidate();
-        return "redirect:/login";
-    }
+    // End
 }

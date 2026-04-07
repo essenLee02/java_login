@@ -31,6 +31,8 @@ public class ItemRepository {
         // stock -> BigDecimal
         i.setStock(rs.getBigDecimal("stock"));
 
+        i.setNote(rs.getString("note"));
+
         i.setBusinessUnit(rs.getString("business_unit"));
 
         // created_at / updated_at -> Timestamp (sesuai model Item)
@@ -65,8 +67,8 @@ public class ItemRepository {
     // ===== CRUD =====
     public void save(Item item) {
         String sql = """
-            INSERT INTO items(code, description, item_type, stock, business_unit, created_at, created_by)
-            VALUES (?, ?, ?, ?, ?, NOW(), ?)
+            INSERT INTO items(code, description, item_type, stock, note, business_unit, created_at, created_by)
+            VALUES (?, ?, ?, ?, ?, ?, NOW(), ?)
         """;
         jdbcTemplate.update(
                 sql,
@@ -74,6 +76,7 @@ public class ItemRepository {
                 item.getDescription(),
                 item.getItemType(),
                 item.getStock(),
+                item.getNote(),
                 item.getBusinessUnit(),
                 item.getCreatedBy()
         );
@@ -82,8 +85,15 @@ public class ItemRepository {
     public void update(Long id, Item item) {
         String sql = """
             UPDATE items
-            SET code = ?, description = ?, item_type = ?, stock = ?, business_unit = ?,
-                updated_at = NOW(), updated_by = ?
+            SET 
+                code = ?
+                , description = ?
+                , item_type = ?
+                , stock = ?
+                , note = ?
+                , business_unit = ?
+                , updated_at = NOW()
+                , updated_by = ?
             WHERE id = ?
         """;
         jdbcTemplate.update(
@@ -92,6 +102,7 @@ public class ItemRepository {
                 item.getDescription(),
                 item.getItemType(),
                 item.getStock(),
+                item.getNote(),
                 item.getBusinessUnit(),
                 item.getUpdatedBy(),
                 id
