@@ -79,14 +79,18 @@
     <body>
         <!-- Sidebar fragment Start -->
         <th:block th:fragment="sidebar">
-            <div th:replace="~{fragments/left_navbar :: left_navbar}"></div>
+            <div th:replace="~{fragments/navbar_left :: navbar_left}"></div>
         </th:block>
         <!-- Sidebar fragment End -->
         
+        <!-- Navbar Header Fragment Start -->
+        <th:block th:fragment="sidebar_header">
+            <div th:replace="~{fragments/navbar_header :: navbar_header}"></div>
+        </th:block>
+        <!-- Navbar Header Fragment End -->
+        
         <!-- Main Content Fragment Start : call with th:replace="~{fragments/layout :: content('METHOD')}" -->
-        <main th:fragment="content(method)" th:attr="data-method=${method}">
-
-        </main>
+        <main th:fragment="content(method)" th:attr="data-method=${method}"></main>
         <!-- Main Content Fragment End -->      
 
         <!-- Scripts fragment (place at end of each page) -->
@@ -99,6 +103,8 @@
         <div th:fragment="scripts(extraScripts)">
             <script th:src="@{/js/jQuery_V3.7.1.min.js}"></script>
             <script th:src="@{/bootstrap-5.3.8/js/bootstrap.bundle.min.js}"></script>
+            <script th:src="@{/Template/admin_kit_template/static/js/app.js}"></script>
+            <script th:src="@{/Template/admin_kit_template/static/js/app.map}"></script>
             <!-- slot tambahan script per-page -->
             <th:block th:replace="${extraScripts} ?: ~{}"></th:block>
         </div>

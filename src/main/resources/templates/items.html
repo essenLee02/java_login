@@ -4,12 +4,18 @@
 
     <body>
         <div class="wrapper">
-            <!-- ✅ Sidebar dari layout -->
+            <!-- Sidebar dari layout Start -->
             <div th:replace="~{fragments/layout :: sidebar}"></div>
+            <!-- Sidebar dari layout End -->
 
-            <form method="POST" action="/items">
-                <!-- ✅ Struktur AdminKit: main/content -->
-                <div class="main">
+            <!-- Struktur AdminKit: main/content Start -->
+            <div class="main">
+                <!-- Navbar Header dari layout Start -->
+                <div th:replace="~{fragments/layout :: sidebar_header}"></div>
+                <!-- Navbar Header dari layout End -->
+
+                <!-- Table Start -->
+                <form method="POST" action="/items">
                     <main class="content">
                         <div class="container-fluid p-0">
 
@@ -106,12 +112,13 @@
                                     </div>
                                 </div>
                             </div>
-
-                        </div>
-                    </main>
-                </div>
-            </form>
-        </div>
+						</div>
+					</main>
+				</form>
+                <!-- Table End -->
+            </div>
+            <!-- Struktur AdminKit: main/content End -->
+        </>
 
         <!-- Scripts Start -->
         <div th:replace="~{fragments/layout :: scripts(~{::extraScripts})}">

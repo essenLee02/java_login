@@ -4,10 +4,16 @@
 
     <body>
         <div class="wrapper">
-            <!-- ✅ Sidebar dari layout -->
+            <!-- Sidebar dari layout Start -->
             <div th:replace="~{fragments/layout :: sidebar}"></div>
+            <!-- Sidebar dari layout End -->
 
             <div class="main">
+                <!-- Navbar Header dari layout Start -->
+                <div th:replace="~{fragments/layout :: sidebar_header}"></div>
+                <!-- Navbar Header dari layout End -->
+                
+                <!-- Form Start -->
                 <main class="content">
                     <div class="container-fluid p-0" style="max-width: 840px;">
                         <div class="d-flex justify-content-between align-items-center mb-3">
@@ -76,6 +82,7 @@
                         </div>
                     </div>
                 </main>
+                <!-- Form End -->
             </div>
         </div>
 
