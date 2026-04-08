@@ -60,130 +60,78 @@
                     $(document).ready(function () {
                         const businessUnitData = /*[[${businessUnits}]]*/ [];
 
-                        function escapeHtml(value) {
-                            if (value === null || value === undefined) return '';
-                            return String(value)
-                                .replace(/&/g, '&amp;')
-                                .replace(/</g, '&lt;')
-                                .replace(/>/g, '&gt;')
-                                .replace(/"/g, '&quot;')
-                                .replace(/'/g, '&#39;');
-                        }
+                        bussinessMasterList($('#search').val(), 'show', 1);
 
-                        function renderTable(data) {
-                            let html = '';
-                            html += '<div class="table-responsive">';
-                            html += '<table class="table table-sm table-striped align-middle">';
-                            html += '<thead class="table-light">';
-                            html += '<tr>';
-                            html += '<th>ID</th>';
-                            html += '<th>ID Business Unit</th>';
-                            html += '<th>ID Company</th>';
-                            html += '<th>Code</th>';
-                            html += '<th>Name</th>';
-                            html += '<th>Country</th>';
-                            html += '<th>Province</th>';
-                            html += '<th>City</th>';
-                            html += '<th>Email</th>';
-                            html += '<th>Phone</th>';
-                            html += '<th>Status</th>';
-                            html += '<th style="width:110px;">Action</th>';
-                            html += '</tr>';
-                            html += '</thead>';
-                            html += '<tbody>';
+                        function bussinessMasterList(bussinessName, type, page = 1) {
+                            var headers = [
+                                'BU Code',
+                                'Name',
+                                'Status'
+                            ];
 
-                            if (!data || data.length === 0) {
-                                html += '<tr><td colspan="12" class="text-center text-muted py-4">No Business Unit data found.</td></tr>';
-                            } else {
-                                data.forEach(function (bu) {
-                                    const id = escapeHtml(bu.id);
-                                    const idBussinessUnit = escapeHtml(bu.idBussinessUnit);
-                                    const idCompany = escapeHtml(bu.idCompany);
-                                    const code = escapeHtml(bu.code);
-                                    const name = escapeHtml(bu.name);
-                                    const idCountry = escapeHtml(bu.idCountry);
-                                    const idProvince = escapeHtml(bu.idProvince);
-                                    const idCity = escapeHtml(bu.idCity);
-                                    const email = escapeHtml(bu.email);
-                                    const phoneNumber = escapeHtml(bu.phoneNumber);
+                            var chunks = [
+                                'code',
+                                'name',
+                                'status'
+                            ];
 
-                                    const statusBadge = Number(bu.status) === 1
-                                        ? '<span class="badge bg-success">Active</span>'
-                                        : '<span class="badge bg-secondary">Inactive</span>';
+                            var keyword = (bussinessName || '').toString().trim().toLowerCase();
 
-                                    html += '<tr>';
-                                    html += '<td>' + id + '</td>';
-                                    html += '<td>' + idBussinessUnit + '</td>';
-                                    html += '<td>' + idCompany + '</td>';
-                                    html += '<td>' + code + '</td>';
-                                    html += '<td>' + name + '</td>';
-                                    html += '<td>' + idCountry + '</td>';
-                                    html += '<td>' + idProvince + '</td>';
-                                    html += '<td>' + idCity + '</td>';
-                                    html += '<td>' + email + '</td>';
-                                    html += '<td>' + phoneNumber + '</td>';
-                                    html += '<td>' + statusBadge + '</td>';
-                                    html += '<td><a class="btn btn-outline-secondary btn-sm" href="/business-units/' + id + '/edit">Edit</a></td>';
-                                    html += '</tr>';
-                                });
-                            }
+                            var filteredData = businessUnitData.filter(function (item) {
+                                if (keyword === '') {
+                                    return true;
+                                }
 
-                            html += '</tbody>';
-                            html += '</table>';
-                            html += '</div>';
+                                var statusText = item.status == 1 ? 'active' : 'inactive';
 
-                            $('#printTable').html(html);
-                        }
-
-                        function filterData(keyword) {
-                            const normalizedKeyword = (keyword || '').toString().trim().toLowerCase();
-
-                            if (!normalizedKeyword) {
-                                return businessUnitData;
-                            }
-
-                            return businessUnitData.filter(function (bu) {
-                                return [
-                                    bu.id,
-                                    bu.idBussinessUnit,
-                                    bu.idCompany,
-                                    bu.code,
-                                    bu.name,
-                                    bu.idCountry,
-                                    bu.idProvince,
-                                    bu.idCity,
-                                    bu.email,
-                                    bu.phoneNumber,
-                                    Number(bu.status) === 1 ? 'active' : 'inactive'
-                                ].some(function (field) {
-                                    return (field || '').toString().toLowerCase().includes(normalizedKeyword);
-                                });
+                                return (
+                                    (item.code || '').toString().toLowerCase().includes(keyword) ||
+                                    (item.name || '').toString().toLowerCase().includes(keyword) ||
+                                    (item.idBussinessUnit || '').toString().toLowerCase().includes(keyword) ||
+                                    (item.idCompany || '').toString().toLowerCase().includes(keyword) ||
+                                    (item.idCountry || '').toString().toLowerCase().includes(keyword) ||
+                                    (item.idProvince || '').toString().toLowerCase().includes(keyword) ||
+                                    (item.idCity || '').toString().toLowerCase().includes(keyword) ||
+                                    (item.email || '').toString().toLowerCase().includes(keyword) ||
+                                    (item.phoneNumber || '').toString().toLowerCase().includes(keyword) ||
+                                    statusText.includes(keyword)
+                                );
                             });
+
+                            var actionUseable = true;
+                            var actionType = [
+                                'update',
+                                'block',
+                                'delete',
+                            ];
+                            var actionParameter = ['id_bussiness_unit'];
+
+                            let cetakTable = tableModal(
+                                headers,
+                                chunks,
+                                filteredData,
+                                actionUseable,
+                                actionType,
+                                actionParameter,
+                                null,
+                                []
+                            );
+
+                            $('#printTable').empty();
+                            $('#printTable').append(cetakTable);
                         }
 
-                        function applySearch() {
-                            const keyword = $('#search').val();
-                            const filtered = filterData(keyword);
-                            renderTable(filtered);
-                        }
-
-                        renderTable(businessUnitData);
-
-                        $('#btnSearch').on('click', function () {
-                            applySearch();
+                        $('#search').on('keyup', function() {
+                            bussinessMasterList($('#search').val(), 'search', 1);
                         });
 
-                        $('#search').on('keyup', function (e) {
-                            if (e.key === 'Enter') {
-                                applySearch();
-                                return;
-                            }
-                            applySearch();
+                        $('#btnSearch').on('click', function () {
+                            bussinessMasterList($('#search').val(), 'search', 1);
                         });
 
                         $('#btnResetSearch').on('click', function () {
                             $('#search').val('');
-                            renderTable(businessUnitData);
+                            bussinessMasterList('', 'reset', 1);
                         });
                     });
                 </script>
