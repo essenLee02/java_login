@@ -27,9 +27,11 @@ public class AuthController {
     }
 
     @PostMapping("/login")
-    public String login(@RequestParam String email,
-                        @RequestParam String password,
-                        HttpSession session) {
+    public String login(
+        @RequestParam String email
+        , @RequestParam String password
+        , HttpSession session
+    ) {
 
         var userOpt = userService.authenticate(email, password);
         if (userOpt.isEmpty()) {
@@ -55,11 +57,9 @@ public class AuthController {
     }
 
     @PostMapping("/register")
-    public String register(
-        @RequestParam String name
-        , @RequestParam String email
-        , @RequestParam String password
-    ) {
+    public String register(@RequestParam String name,
+        @RequestParam String email,
+        @RequestParam String password) {
 
         if (name == null || name.trim().isEmpty()) {
             return "redirect:/register?error=Nama wajib diisi";
