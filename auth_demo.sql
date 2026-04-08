@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Waktu pembuatan: 08 Apr 2026 pada 06.40
+-- Waktu pembuatan: 08 Apr 2026 pada 11.22
 -- Versi server: 10.4.32-MariaDB
 -- Versi PHP: 8.1.25
 
@@ -56,7 +56,9 @@ CREATE TABLE `bussiness_units` (
 --
 
 INSERT INTO `bussiness_units` (`id`, `id_bussiness_unit`, `id_company`, `code`, `name`, `address`, `id_country`, `id_province`, `id_city`, `tax_number`, `email`, `phone_number`, `status`, `created_date`, `created_by`, `updated_date`, `updated_by`, `deleted_date`, `deleted_by`, `created_at`, `updated_at`) VALUES
-(1, '', NULL, 'BUSKPL.0001.0000.000021', 'PT TRIAL WEB', 'JLN SAMBI KEREP LONTAR NO.113', NULL, NULL, NULL, '38298721', 'dokumen.lia@gmail.co.id', '+6325-1336-3613', 1, '2026-04-07', '1', '2026-04-08', '2', NULL, NULL, '2026-04-07 09:44:51', '2026-04-08 01:52:02');
+(1, '', NULL, 'BUSKPL.0001.0000.000021', 'PT TRIAL WEB', 'JLN SAMBI KEREP LONTAR NO.113', NULL, NULL, NULL, '38298721', 'dokumen.lia@gmail.co.id', '+6325-1336-3613', 1, '2026-04-07', '1', '2026-04-08', '2', NULL, NULL, '2026-04-07 09:44:51', '2026-04-08 01:52:02'),
+(2, '6UGPT0000002', NULL, 'BUSKPL.0001.0000.000001', 'PT INDOPRIMA', 'JLNKEDAMEAN 2/NO23', NULL, NULL, NULL, '382682', NULL, '0312-5133-6361', 1, '2026-04-08', '2', '2026-04-08', '2', NULL, NULL, '2026-04-08 07:48:15', '2026-04-08 07:48:15'),
+(3, 'IPCUD0000003', NULL, 'BUSKPL.0001.0000.000006', 'UD VISINIAGA MITRA KREASINDO', 'JALAN KEDUNG TARI BLOK F NO 17', NULL, NULL, NULL, NULL, NULL, '0832-3527-2128', 1, '2026-04-08', '2', '2026-04-08', '2', NULL, NULL, '2026-04-08 07:49:24', '2026-04-08 07:49:24');
 
 -- --------------------------------------------------------
 
@@ -142,7 +144,7 @@ ALTER TABLE `users`
 -- AUTO_INCREMENT untuk tabel `bussiness_units`
 --
 ALTER TABLE `bussiness_units`
-  MODIFY `id` bigint(20) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
+  MODIFY `id` bigint(20) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
 
 --
 -- AUTO_INCREMENT untuk tabel `items`

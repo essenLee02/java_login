@@ -22,7 +22,7 @@ public class BusinessUnitController extends GenerateController {
 
     private final BusinessUnitService service;
 
-    @Value("${app.pagination.page-size:2}")
+    @Value("${app.pagination.page-size:10}")
     private int defaultPageSize;
 
     @Value("${app.location:Page_Components}")
@@ -42,27 +42,29 @@ public class BusinessUnitController extends GenerateController {
 
     @GetMapping("/business-units")
     public String businessUnits(
-            Model model,
-            @RequestParam(name = "page", defaultValue = "0") int page,
-            @RequestParam(name = "size", required = false) Integer size,
-            @RequestParam(name = "search", defaultValue = "") String search,
-            HttpSession session
+            Model model
+            , @RequestParam(name = "page", defaultValue = "0") int page
+            , @RequestParam(name = "size", required = false) Integer size
+            , @RequestParam(name = "search", defaultValue = "") String search
+            , HttpSession session
     ) {
         if (!isLoggedIn(session)) {
             return "redirect:/login";
         }
 
         int pageSize = (size == null || size <= 0) ? defaultPageSize : size;
-        if (page < 0) {
-            page = 0;
-        }
+        if (page < 0) { page = 0; }
 
         search = emptyToEmpty(search);
 
         long totalElements = service.countAll(search);
         int totalPages = (int) Math.ceil(totalElements / (double) pageSize);
 
-        if (totalPages > 0 && page > totalPages - 1) {
+        if (totalPages <= 0) {
+            totalPages = 1;
+        }
+
+        if (page > totalPages - 1) {
             page = totalPages - 1;
         }
 
@@ -73,11 +75,8 @@ public class BusinessUnitController extends GenerateController {
         model.addAttribute("totalElements", totalElements);
         model.addAttribute("totalPages", totalPages);
         model.addAttribute("hasPrev", page > 0);
-        model.addAttribute("hasNext", totalPages > 0 && page < totalPages - 1);
-
-        if (totalPages > 1) {
-            model.addAttribute("pageNumbers", IntStream.range(0, totalPages).boxed().toList());
-        }
+        model.addAttribute("hasNext", page < totalPages - 1);
+        model.addAttribute("pageNumbers", IntStream.range(0, totalPages).boxed().toList());
 
         return appLocation + "/BusinessUnit/business-units";
     }
