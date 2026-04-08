@@ -17,8 +17,10 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.stream.IntStream;
 
+import com.example.auth.util.GenerateController;
+
 @Controller
-public class ItemController {
+public class ItemController extends GenerateController {
 
     private final ItemService service;
 
@@ -53,10 +55,6 @@ public class ItemController {
                 "Fixed Assets",
                 "Logs"
         );
-    }
-
-    private boolean isLoggedIn(HttpSession session) {
-        return session != null && session.getAttribute("userId") != null;
     }
 
     @GetMapping("/items")

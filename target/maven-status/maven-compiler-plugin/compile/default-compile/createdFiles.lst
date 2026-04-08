@@ -1,6 +1,5 @@
 com\example\auth\repository\ItemRepository.class
 com\example\auth\repository\UserRepository.class
-com\example\auth\controller\ItemController.class
 com\example\auth\service\UserService.class
 com\example\auth\AuthApplication.class
 com\example\auth\controller\AuthController.class

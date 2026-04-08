@@ -2,6 +2,8 @@ package com.example.auth.util;
 
 import java.util.Random;
 
+import jakarta.servlet.http.HttpSession;
+
 public class GenerateController {
 
     protected String generateRandomString(int length, String nama, long digitData) {
@@ -39,5 +41,9 @@ public class GenerateController {
         }
 
         return (randomString.toString() + namaPrefix + digits).toUpperCase();
+    }
+
+    protected boolean isLoggedIn(HttpSession session) {
+        return session != null && session.getAttribute("userId") != null;
     }
 }

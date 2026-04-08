@@ -32,10 +32,6 @@ public class BusinessUnitController extends GenerateController {
         this.service = service;
     }
 
-    private boolean isLoggedIn(HttpSession session) {
-        return session != null && session.getAttribute("userId") != null;
-    }
-
     private String emptyToNull(String value) {
         return (value == null || value.trim().isEmpty()) ? null : value.trim();
     }
