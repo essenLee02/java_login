@@ -21,7 +21,10 @@ public class AuthController {
     }
 
     @GetMapping("/login")
-    public String loginPage(@RequestParam(required = false) String error, Model model) {
+    public String loginPage(
+        @RequestParam(required = false) String error
+        , Model model
+    ) {
         model.addAttribute("error", error);
         return "login";
     }
@@ -57,9 +60,11 @@ public class AuthController {
     }
 
     @PostMapping("/register")
-    public String register(@RequestParam String name,
-        @RequestParam String email,
-        @RequestParam String password) {
+    public String register(
+        @RequestParam String name
+        , @RequestParam String email
+        , @RequestParam String password
+    ) {
 
         if (name == null || name.trim().isEmpty()) {
             return "redirect:/register?error=Nama wajib diisi";
@@ -79,7 +84,10 @@ public class AuthController {
     }
 
     @GetMapping("/dashboard")
-    public String dashboard(HttpSession session, Model model) {
+    public String dashboard(
+        HttpSession session
+        , Model model
+    ) {
         var email = session.getAttribute("userEmail");
         if (email == null) return "redirect:/login";
 
