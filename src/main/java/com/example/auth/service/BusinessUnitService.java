@@ -15,12 +15,16 @@ public class BusinessUnitService {
         this.repository = repository;
     }
 
-    public List<BusinessUnit> getPage(int page, int size) {
-        return repository.findPage(page, size);
+    public long countAll(String search) {
+        return repository.countAll(search);
     }
 
-    public long countAll() {
-        return repository.countAll();
+    public List<BusinessUnit> getPage(String search, int page, int size) {
+        return repository.findPage(search, page, size);
+    }
+
+    public BusinessUnit findById(Long id) {
+        return repository.findById(id);
     }
 
     public void save(BusinessUnit businessUnit) {
@@ -30,8 +34,8 @@ public class BusinessUnitService {
     public void update(Long id, BusinessUnit businessUnit) {
         repository.update(id, businessUnit);
     }
-    
-    public BusinessUnit findById(Long id) {
-        return repository.findById(id);
+
+    public void delete(Long id) {
+        repository.delete(id);
     }
 }

@@ -34,7 +34,7 @@
                                         placeholder="Search by code, name, country, province, city, email, phone..."
                                         id="search"
                                         name="search"
-                                        value="">
+                                        th:value="${search}">
                                     <button class="btn btn-info text-light" type="button" id="btnSearch">Search</button>
                                     <button class="btn btn-outline-secondary" type="button" id="btnResetSearch">Reset</button>
                                 </div>
@@ -42,6 +42,54 @@
 
                             <div class="card-body">
                                 <div id="printTable"></div>
+                                
+                                <!-- Pagination Start -->
+                                <div id="pagination" class="mt-3">
+                                    <nav aria-label="Business Unit pagination">
+                                        <ul class="pagination justify-content-center mb-0">
+                                            <!-- Prev Start -->
+                                            <li class="page-item" th:classappend="${!hasPrev} ? ' disabled'">
+                                                <a class="page-link"
+                                                    th:href="@{/business-units(page=${currentPage - 1}, size=${pageSize}, search=${search})}">
+                                                    &laquo;
+                                                </a>
+                                            </li>
+                                            <!-- Prev End -->
+                                            
+                                            <!-- Jika controller kirim pageNumbers -->
+                                            <th:block th:if="${pageNumbers != null and !#lists.isEmpty(pageNumbers)}">
+                                                <li class="page-item" th:each="p : ${pageNumbers}"
+                                                    th:classappend="${p == currentPage} ? ' active'">
+                                                    <a class="page-link"
+                                                        th:href="@{/business-units(page=${p}, size=${pageSize}, search=${search})}"
+                                                        th:text="${p + 1}">
+                                                        1
+                                                    </a>
+                                                </li>
+                                            </th:block>
+
+                                            <!-- Fallback Start : kalau cuma 1 page dan pageNumbers tidak dikirim -->
+                                            <th:block th:if="${pageNumbers == null or #lists.isEmpty(pageNumbers)}">
+                                                <li class="page-item active">
+                                                    <a class="page-link"
+                                                        th:href="@{/business-units(page=0, size=${pageSize}, search=${search})}">
+                                                        1
+                                                    </a>
+                                                </li>
+                                            </th:block>
+                                            <!-- Fallback End -->
+                                            <!-- Next Start -->
+                                            <li class="page-item" th:classappend="${!hasNext} ? ' disabled'">
+                                                <a class="page-link"
+                                                    th:href="@{/business-units(page=${currentPage + 1}, size=${pageSize}, search=${search})}">
+                                                    &raquo;
+                                                </a>
+                                            </li>
+                                            <!-- Next End -->
+                                        </ul>
+                                    </nav>
+                                </div>
+                                <!-- Pagination End -->
                             </div>
                         </div>
                     </div>
@@ -59,10 +107,11 @@
                 <script th:inline="javascript">
                     $(document).ready(function () {
                         const businessUnitData = /*[[${businessUnits}]]*/ [];
+                        const currentPageSize = /*[[${pageSize}]]*/ 10;
 
-                        bussinessMasterList($('#search').val(), 'show', 1);
+                        bussinessMasterList();
 
-                        function bussinessMasterList(bussinessName, type, page = 1) {
+                        function bussinessMasterList() {
                             var headers = [
                                 'BU Code',
                                 'Name',
@@ -75,41 +124,19 @@
                                 'status'
                             ];
 
-                            var keyword = (bussinessName || '').toString().trim().toLowerCase();
-
-                            var filteredData = businessUnitData.filter(function (item) {
-                                if (keyword === '') {
-                                    return true;
-                                }
-
-                                var statusText = item.status == 1 ? 'active' : 'inactive';
-
-                                return (
-                                    (item.code || '').toString().toLowerCase().includes(keyword) ||
-                                    (item.name || '').toString().toLowerCase().includes(keyword) ||
-                                    (item.idBussinessUnit || '').toString().toLowerCase().includes(keyword) ||
-                                    (item.idCompany || '').toString().toLowerCase().includes(keyword) ||
-                                    (item.idCountry || '').toString().toLowerCase().includes(keyword) ||
-                                    (item.idProvince || '').toString().toLowerCase().includes(keyword) ||
-                                    (item.idCity || '').toString().toLowerCase().includes(keyword) ||
-                                    (item.email || '').toString().toLowerCase().includes(keyword) ||
-                                    (item.phoneNumber || '').toString().toLowerCase().includes(keyword) ||
-                                    statusText.includes(keyword)
-                                );
-                            });
-
                             var actionUseable = true;
                             var actionType = [
                                 'update',
                                 'block',
-                                'delete',
+                                'delete'
                             ];
-                            var actionParameter = ['id_bussiness_unit'];
+
+                            var actionParameter = ['id'];
 
                             let cetakTable = tableModal(
                                 headers,
                                 chunks,
-                                filteredData,
+                                businessUnitData,
                                 actionUseable,
                                 actionType,
                                 actionParameter,
@@ -117,21 +144,24 @@
                                 []
                             );
 
-                            $('#printTable').empty();
-                            $('#printTable').append(cetakTable);
+                            $('#printTable').empty().append(cetakTable);
                         }
 
-                        $('#search').on('keyup', function() {
-                            bussinessMasterList($('#search').val(), 'search', 1);
+                        $('#btnSearch').on('click', function () {
+                            const keyword = $('#search').val() || '';
+                            window.location.href = `/business-units?page=0&size=${currentPageSize}&search=${encodeURIComponent(keyword)}`;
                         });
 
-                        $('#btnSearch').on('click', function () {
-                            bussinessMasterList($('#search').val(), 'search', 1);
+                        $('#search').on('keyup', function (e) {
+                            if (e.key === 'Enter') {
+                                const keyword = $('#search').val() || '';
+                                window.location.href = `/business-units?page=0&size=${currentPageSize}&search=${encodeURIComponent(keyword)}`;
+                            }
                         });
 
                         $('#btnResetSearch').on('click', function () {
                             $('#search').val('');
-                            bussinessMasterList('', 'reset', 1);
+                            window.location.href = `/business-units?page=0&size=${currentPageSize}&search=`;
                         });
                     });
                 </script>

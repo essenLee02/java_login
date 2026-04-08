@@ -2,6 +2,7 @@ package com.example.auth.controller;
 
 import com.example.auth.model.BusinessUnit;
 import com.example.auth.service.BusinessUnitService;
+import com.example.auth.util.GenerateController;
 import jakarta.servlet.http.HttpSession;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Controller;
@@ -15,14 +16,13 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.time.LocalDate;
 import java.util.stream.IntStream;
-import com.example.auth.util.GenerateController;
 
 @Controller
 public class BusinessUnitController extends GenerateController {
 
     private final BusinessUnitService service;
 
-    @Value("${app.pagination.page-size:10}")
+    @Value("${app.pagination.page-size:2}")
     private int defaultPageSize;
 
     @Value("${app.location:Page_Components}")
@@ -45,6 +45,7 @@ public class BusinessUnitController extends GenerateController {
             Model model,
             @RequestParam(name = "page", defaultValue = "0") int page,
             @RequestParam(name = "size", required = false) Integer size,
+            @RequestParam(name = "search", defaultValue = "") String search,
             HttpSession session
     ) {
         if (!isLoggedIn(session)) {
@@ -56,14 +57,17 @@ public class BusinessUnitController extends GenerateController {
             page = 0;
         }
 
-        long totalElements = service.countAll();
+        search = emptyToEmpty(search);
+
+        long totalElements = service.countAll(search);
         int totalPages = (int) Math.ceil(totalElements / (double) pageSize);
 
         if (totalPages > 0 && page > totalPages - 1) {
             page = totalPages - 1;
         }
 
-        model.addAttribute("businessUnits", service.getPage(page, pageSize));
+        model.addAttribute("businessUnits", service.getPage(search, page, pageSize));
+        model.addAttribute("search", search);
         model.addAttribute("currentPage", page);
         model.addAttribute("pageSize", pageSize);
         model.addAttribute("totalElements", totalElements);
@@ -104,15 +108,14 @@ public class BusinessUnitController extends GenerateController {
                 return "redirect:/login";
             }
 
-            long totalByCompany = service.countAll();
+            long totalByCompany = service.countAll("");
 
-            // 🔥 pakai function dari parent class
             String generatedId = generateRandomString(3, businessUnit.getName(), totalByCompany);
 
             businessUnit.setIdBussinessUnit(generatedId);
             businessUnit.setIdCompany(emptyToNull(businessUnit.getIdCompany()));
-            businessUnit.setCode(businessUnit.getCode());
-            businessUnit.setName(businessUnit.getName());
+            businessUnit.setCode(emptyToNull(businessUnit.getCode()));
+            businessUnit.setName(emptyToNull(businessUnit.getName()));
             businessUnit.setAddress(emptyToNull(businessUnit.getAddress()));
             businessUnit.setIdCountry(emptyToNull(businessUnit.getIdCountry()));
             businessUnit.setIdProvince(emptyToNull(businessUnit.getIdProvince()));
@@ -126,8 +129,9 @@ public class BusinessUnitController extends GenerateController {
             businessUnit.setUpdatedBy(String.valueOf(session.getAttribute("userId")));
             businessUnit.setDeletedDate(null);
             businessUnit.setDeletedBy(null);
+
             if (businessUnit.getStatus() == null) {
-                businessUnit.setStatus(1); // Aktif secara default
+                businessUnit.setStatus(1);
             }
 
             service.save(businessUnit);
@@ -177,9 +181,13 @@ public class BusinessUnitController extends GenerateController {
 
             BusinessUnit existingBusinessUnit = service.findById(id);
 
+            businessUnit.setId(id);
             businessUnit.setIdBussinessUnit(emptyToEmpty(existingBusinessUnit.getIdBussinessUnit()));
             businessUnit.setIdCompany(emptyToNull(existingBusinessUnit.getIdCompany()));
-            businessUnit.setCode(emptyToNull(businessUnit.getCode()));
+
+            // code tidak boleh diubah saat edit
+            businessUnit.setCode(emptyToNull(existingBusinessUnit.getCode()));
+
             businessUnit.setName(emptyToNull(businessUnit.getName()));
             businessUnit.setAddress(emptyToNull(businessUnit.getAddress()));
             businessUnit.setIdCountry(emptyToNull(businessUnit.getIdCountry()));
