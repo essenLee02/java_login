@@ -1,7 +1,7 @@
 <!doctype html>
 <html lang="en" xmlns:th="http://www.thymeleaf.org">
     <body>
-        <nav id="sidebar" class="sidebar js-sidebar" th:fragment="left_navbar">
+        <nav id="sidebar" class="sidebar js-sidebar" th:fragment="navbar_left">
             <div class="sidebar-content js-simplebar">
                 <a class="sidebar-brand" th:href="@{/dashboard}">
                     <span class="align-middle" th:text="${session.userName} ?: 'Auth Demo'">Auth Demo</span>
@@ -26,6 +26,13 @@
                         </a>
                     </li>
 
+                    <li class="sidebar-item">
+                        <a class="sidebar-link" th:href="@{/business-units}">
+                            <i class="align-middle" data-feather="briefcase"></i>
+                            <span class="align-middle">Business Units</span>
+                        </a>
+                    </li>
+                    
                     <li class="sidebar-item">
                         <a class="sidebar-link" th:href="@{/profile}">
                             <i class="align-middle" data-feather="user"></i>

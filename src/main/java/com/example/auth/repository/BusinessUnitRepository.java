@@ -10,6 +10,8 @@ import java.util.List;
 @Repository
 public class BusinessUnitRepository {
 
+    private static final String TABLE_NAME = "bussiness_units";
+
     private final JdbcTemplate jdbcTemplate;
 
     public BusinessUnitRepository(JdbcTemplate jdbcTemplate) {
@@ -37,27 +39,89 @@ public class BusinessUnitRepository {
         bu.setUpdatedBy(rs.getString("updated_by"));
         bu.setDeletedDate(rs.getString("deleted_date"));
         bu.setDeletedBy(rs.getString("deleted_by"));
+
+        if (hasColumn(rs, "created_by_name")) {
+            bu.setCreatedByName(rs.getString("created_by_name"));
+        }
+        if (hasColumn(rs, "updated_by_name")) {
+            bu.setUpdatedByName(rs.getString("updated_by_name"));
+        }
+
         return bu;
     };
 
     public List<BusinessUnit> findPage(int page, int size) {
         int offset = page * size;
         String sql = """
-            SELECT *
-            FROM bussiness_units
-            ORDER BY code ASC
+            SELECT
+                bu.id,
+                bu.id_bussiness_unit,
+                bu.id_company,
+                bu.code,
+                bu.name,
+                bu.address,
+                bu.id_country,
+                bu.id_province,
+                bu.id_city,
+                bu.tax_number,
+                bu.email,
+                bu.phone_number,
+                bu.status,
+                bu.created_date,
+                bu.created_by,
+                bu.updated_date,
+                bu.updated_by,
+                bu.deleted_date,
+                bu.deleted_by,
+                uc.name AS created_by_name,
+                uu.name AS updated_by_name
+            FROM bussiness_units bu
+            LEFT JOIN users uc ON bu.created_by = uc.id
+            LEFT JOIN users uu ON bu.updated_by = uu.id
+            ORDER BY bu.code ASC
             LIMIT ? OFFSET ?
         """;
         return jdbcTemplate.query(sql, rowMapper, size, offset);
     }
 
     public long countAll() {
-        String sql = "SELECT COUNT(*) FROM bussiness_units";
+        String sql = "SELECT COUNT(*) FROM " + TABLE_NAME;
         return jdbcTemplate.queryForObject(sql, Long.class);
     }
 
     public BusinessUnit findById(Long id) {
-        String sql = "SELECT * FROM bussiness_units WHERE id = ?";
+        String sql = """
+            SELECT
+                bu.id
+                , bu.id_bussiness_unit
+                , bu.id_company
+                , bu.code
+                , bu.name
+                , bu.address
+                , bu.id_country
+                , bu.id_province
+                , bu.id_city
+                , bu.tax_number
+                , bu.email
+                , bu.phone_number
+                , bu.status
+                , bu.created_date
+                , bu.created_by
+                , bu.updated_date
+                , bu.updated_by
+                , bu.deleted_date
+                , bu.deleted_by
+                , uc.name AS created_by_name
+                , uu.name AS updated_by_name
+            FROM
+                bussiness_units bu
+            LEFT JOIN users uc ON
+                bu.created_by = uc.id
+            LEFT JOIN users uu ON
+                bu.updated_by = uu.id
+            WHERE bu.id = ?
+        """;
+
         return jdbcTemplate.queryForObject(sql, rowMapper, id);
     }
 
@@ -102,11 +166,11 @@ public class BusinessUnitRepository {
                 bu.getPhoneNumber(),
                 bu.getStatus(),
                 emptyToNull(bu.getCreatedDate()),
-                bu.getCreatedBy(),
+                emptyToNull(bu.getCreatedBy()),
                 emptyToNull(bu.getUpdatedDate()),
-                bu.getUpdatedBy(),
+                emptyToNull(bu.getUpdatedBy()),
                 emptyToNull(bu.getDeletedDate()),
-                bu.getDeletedBy()
+                emptyToNull(bu.getDeletedBy())
         );
     }
 
@@ -137,7 +201,7 @@ public class BusinessUnitRepository {
 
         jdbcTemplate.update(
                 sql,
-                bu.getIdBussinessUnit(),
+                emptyToEmpty(bu.getIdBussinessUnit()),
                 bu.getIdCompany(),
                 bu.getCode(),
                 bu.getName(),
@@ -150,16 +214,29 @@ public class BusinessUnitRepository {
                 bu.getPhoneNumber(),
                 bu.getStatus(),
                 emptyToNull(bu.getCreatedDate()),
-                bu.getCreatedBy(),
+                emptyToNull(bu.getCreatedBy()),
                 emptyToNull(bu.getUpdatedDate()),
-                bu.getUpdatedBy(),
+                emptyToNull(bu.getUpdatedBy()),
                 emptyToNull(bu.getDeletedDate()),
-                bu.getDeletedBy(),
+                emptyToNull(bu.getDeletedBy()),
                 id
         );
     }
 
+    private boolean hasColumn(java.sql.ResultSet rs, String columnName) {
+        try {
+            rs.findColumn(columnName);
+            return true;
+        } catch (java.sql.SQLException e) {
+            return false;
+        }
+    }
+
     private String emptyToNull(String value) {
         return (value == null || value.trim().isEmpty()) ? null : value.trim();
+    }
+
+    private String emptyToEmpty(String value) {
+        return value == null ? "" : value.trim();
     }
 }

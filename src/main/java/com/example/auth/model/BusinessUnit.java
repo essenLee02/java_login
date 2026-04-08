@@ -22,6 +22,10 @@ public class BusinessUnit {
     private String deletedDate;
     private String deletedBy;
 
+    // tambahan untuk display name user
+    private String createdByName;
+    private String updatedByName;
+
     public Long getId() {
         return id;
     }
@@ -173,4 +177,22 @@ public class BusinessUnit {
     public void setDeletedBy(String deletedBy) {
         this.deletedBy = deletedBy;
     }
+
+    // Tambahan untuk display name dari user - Start
+    public String getCreatedByName() {
+        return createdByName;
+    }
+
+    public void setCreatedByName(String createdByName) {
+        this.createdByName = createdByName;
+    }
+
+    public String getUpdatedByName() {
+        return updatedByName;
+    }
+
+    public void setUpdatedByName(String updatedByName) {
+        this.updatedByName = updatedByName;
+    }
+    // Tambahan untuk display name dari user - End
 }

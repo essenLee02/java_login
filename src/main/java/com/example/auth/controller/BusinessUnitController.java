@@ -128,9 +128,11 @@ public class BusinessUnitController extends GenerateController {
             businessUnit.setCreatedBy(String.valueOf(session.getAttribute("userId")));
             businessUnit.setUpdatedDate(LocalDate.now().toString());
             businessUnit.setUpdatedBy(String.valueOf(session.getAttribute("userId")));
-            businessUnit.setDeletedDate(LocalDate.now().toString());
-            businessUnit.setDeletedBy(String.valueOf(session.getAttribute("userId")));
-            businessUnit.setStatus(1); // Aktif secara default
+            businessUnit.setDeletedDate(null);
+            businessUnit.setDeletedBy(null);
+            if (businessUnit.getStatus() == null) {
+                businessUnit.setStatus(1); // Aktif secara default
+            }
 
             service.save(businessUnit);
             ra.addFlashAttribute("success", "Business Unit saved successfully");
@@ -177,10 +179,12 @@ public class BusinessUnitController extends GenerateController {
                 return "redirect:/login";
             }
 
-            businessUnit.setIdBussinessUnit(emptyToEmpty(businessUnit.getIdBussinessUnit()));
-            businessUnit.setIdCompany(emptyToNull(businessUnit.getIdCompany()));
-            // businessUnit.setCode(businessUnit.getCode());
-            businessUnit.setName(businessUnit.getName());
+            BusinessUnit existingBusinessUnit = service.findById(id);
+
+            businessUnit.setIdBussinessUnit(emptyToEmpty(existingBusinessUnit.getIdBussinessUnit()));
+            businessUnit.setIdCompany(emptyToNull(existingBusinessUnit.getIdCompany()));
+            businessUnit.setCode(emptyToNull(businessUnit.getCode()));
+            businessUnit.setName(emptyToNull(businessUnit.getName()));
             businessUnit.setAddress(emptyToNull(businessUnit.getAddress()));
             businessUnit.setIdCountry(emptyToNull(businessUnit.getIdCountry()));
             businessUnit.setIdProvince(emptyToNull(businessUnit.getIdProvince()));
@@ -188,23 +192,15 @@ public class BusinessUnitController extends GenerateController {
             businessUnit.setTaxNumber(emptyToNull(businessUnit.getTaxNumber()));
             businessUnit.setEmail(emptyToNull(businessUnit.getEmail()));
             businessUnit.setPhoneNumber(emptyToNull(businessUnit.getPhoneNumber()));
-            businessUnit.setCreatedDate(emptyToNull(businessUnit.getCreatedDate()));
-            businessUnit.setUpdatedDate(emptyToNull(businessUnit.getUpdatedDate()));
-            businessUnit.setDeletedDate(emptyToNull(businessUnit.getDeletedDate()));
-            businessUnit.setDeletedBy(emptyToNull(businessUnit.getDeletedBy()));
-
-            if (businessUnit.getCreatedBy() != null) {
-                businessUnit.setCreatedBy(emptyToNull(businessUnit.getCreatedBy()));
-            }
-
-            if (businessUnit.getUpdatedBy() == null || businessUnit.getUpdatedBy().trim().isEmpty()) {
-                businessUnit.setUpdatedBy(String.valueOf(session.getAttribute("userId")));
-            } else {
-                businessUnit.setUpdatedBy(businessUnit.getUpdatedBy().trim());
-            }
+            businessUnit.setCreatedDate(existingBusinessUnit.getCreatedDate());
+            businessUnit.setCreatedBy(existingBusinessUnit.getCreatedBy());
+            businessUnit.setUpdatedDate(LocalDate.now().toString());
+            businessUnit.setUpdatedBy(String.valueOf(session.getAttribute("userId")));
+            businessUnit.setDeletedDate(existingBusinessUnit.getDeletedDate());
+            businessUnit.setDeletedBy(existingBusinessUnit.getDeletedBy());
 
             if (businessUnit.getStatus() == null) {
-                businessUnit.setStatus(1);
+                businessUnit.setStatus(existingBusinessUnit.getStatus() == null ? 1 : existingBusinessUnit.getStatus());
             }
 
             service.update(id, businessUnit);
