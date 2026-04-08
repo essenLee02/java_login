@@ -31,7 +31,7 @@
 
                                     <div class="col-md-4">
                                         <label class="form-label">Code</label>
-                                        <input type="text" name="code" class="form-control" th:value="${businessUnit.code}" required>
+                                        <input type="text" name="code" class="form-control" th:value="${businessUnit.code}" th:disabled="${mode == 'edit'}" required>
                                     </div>
 
                                     <div class="col-md-6">

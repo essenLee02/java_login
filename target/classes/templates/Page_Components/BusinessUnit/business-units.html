@@ -27,79 +27,21 @@
                         <div th:if="${error}" class="alert alert-danger" th:text="${error}"></div>
 
                         <div class="card">
-                            <div class="card-body">
-                                <div class="table-responsive">
-                                    <table class="table table-sm table-striped align-middle">
-                                        <thead class="table-light">
-                                        <tr>
-                                            <th>ID</th>
-                                            <th>ID Business Unit</th>
-                                            <th>ID Company</th>
-                                            <th>Code</th>
-                                            <th>Name</th>
-                                            <th>Country</th>
-                                            <th>Province</th>
-                                            <th>City</th>
-                                            <th>Email</th>
-                                            <th>Phone</th>
-                                            <th>Status</th>
-                                            <th style="width:110px;">Action</th>
-                                        </tr>
-                                        </thead>
-                                        <tbody>
-                                        <tr th:each="bu : ${businessUnits}">
-                                            <td th:text="${bu.id}"></td>
-                                            <td th:text="${bu.idBussinessUnit}"></td>
-                                            <td th:text="${bu.idCompany}"></td>
-                                            <td th:text="${bu.code}"></td>
-                                            <td th:text="${bu.name}"></td>
-                                            <td th:text="${bu.idCountry}"></td>
-                                            <td th:text="${bu.idProvince}"></td>
-                                            <td th:text="${bu.idCity}"></td>
-                                            <td th:text="${bu.email}"></td>
-                                            <td th:text="${bu.phoneNumber}"></td>
-                                            <td>
-                                                <span class="badge bg-success" th:if="${bu.status == 1}">Active</span>
-                                                <span class="badge bg-secondary" th:if="${bu.status != 1}">Inactive</span>
-                                            </td>
-                                            <td>
-                                                <a class="btn btn-outline-secondary btn-sm"
-                                                th:href="@{/business-units/{id}/edit(id=${bu.id})}">
-                                                    Edit
-                                                </a>
-                                            </td>
-                                        </tr>
-
-                                        <tr th:if="${#lists.isEmpty(businessUnits)}">
-                                            <td colspan="12" class="text-center text-muted py-4">No Business Unit data yet.</td>
-                                        </tr>
-                                        </tbody>
-                                    </table>
-
-                                    <nav aria-label="Business Unit pagination" class="mt-3" th:if="${totalPages != null and totalPages > 1}">
-                                        <ul class="pagination justify-content-center mb-0">
-                                            <li class="page-item" th:classappend="${!hasPrev} ? ' disabled'">
-                                                <a class="page-link" th:href="@{/business-units(page=${currentPage-1})}">
-                                                    &laquo;
-                                                </a>
-                                            </li>
-
-                                            <li class="page-item"
-                                                th:each="p : ${pageNumbers}"
-                                                th:classappend="${p == currentPage} ? ' active'">
-                                                <a class="page-link"
-                                                th:href="@{/business-units(page=${p})}"
-                                                th:text="${p + 1}">1</a>
-                                            </li>
-
-                                            <li class="page-item" th:classappend="${!hasNext} ? ' disabled'">
-                                                <a class="page-link" th:href="@{/business-units(page=${currentPage+1})}">
-                                                    &raquo;
-                                                </a>
-                                            </li>
-                                        </ul>
-                                    </nav>
+                            <div class="card-header">
+                                <div class="input-group">
+                                    <input type="text"
+                                        class="form-control form-control-lg"
+                                        placeholder="Search by code, name, country, province, city, email, phone..."
+                                        id="search"
+                                        name="search"
+                                        value="">
+                                    <button class="btn btn-info text-light" type="button" id="btnSearch">Search</button>
+                                    <button class="btn btn-outline-secondary" type="button" id="btnResetSearch">Reset</button>
                                 </div>
+                            </div>
+
+                            <div class="card-body">
+                                <div id="printTable"></div>
                             </div>
                         </div>
                     </div>
@@ -110,12 +52,140 @@
         <!-- Scripts Start -->
         <div th:replace="~{fragments/layout :: scripts(~{::extraScripts})}">
             <th:block th:fragment="extraScripts">
-                <!-- contoh tambahan script (kalau file-nya memang ada) -->
                 <script th:src="@{/Template/toast/toastr.min.js}"></script>
                 <script th:src="@{/Function_Path/function_form.js}"></script>
                 <script th:src="@{/Function_Path/function_work.js}"></script>
-                <script>
-                    
+
+                <script th:inline="javascript">
+                    $(document).ready(function () {
+                        const businessUnitData = /*[[${businessUnits}]]*/ [];
+
+                        function escapeHtml(value) {
+                            if (value === null || value === undefined) return '';
+                            return String(value)
+                                .replace(/&/g, '&amp;')
+                                .replace(/</g, '&lt;')
+                                .replace(/>/g, '&gt;')
+                                .replace(/"/g, '&quot;')
+                                .replace(/'/g, '&#39;');
+                        }
+
+                        function renderTable(data) {
+                            let html = '';
+                            html += '<div class="table-responsive">';
+                            html += '<table class="table table-sm table-striped align-middle">';
+                            html += '<thead class="table-light">';
+                            html += '<tr>';
+                            html += '<th>ID</th>';
+                            html += '<th>ID Business Unit</th>';
+                            html += '<th>ID Company</th>';
+                            html += '<th>Code</th>';
+                            html += '<th>Name</th>';
+                            html += '<th>Country</th>';
+                            html += '<th>Province</th>';
+                            html += '<th>City</th>';
+                            html += '<th>Email</th>';
+                            html += '<th>Phone</th>';
+                            html += '<th>Status</th>';
+                            html += '<th style="width:110px;">Action</th>';
+                            html += '</tr>';
+                            html += '</thead>';
+                            html += '<tbody>';
+
+                            if (!data || data.length === 0) {
+                                html += '<tr><td colspan="12" class="text-center text-muted py-4">No Business Unit data found.</td></tr>';
+                            } else {
+                                data.forEach(function (bu) {
+                                    const id = escapeHtml(bu.id);
+                                    const idBussinessUnit = escapeHtml(bu.idBussinessUnit);
+                                    const idCompany = escapeHtml(bu.idCompany);
+                                    const code = escapeHtml(bu.code);
+                                    const name = escapeHtml(bu.name);
+                                    const idCountry = escapeHtml(bu.idCountry);
+                                    const idProvince = escapeHtml(bu.idProvince);
+                                    const idCity = escapeHtml(bu.idCity);
+                                    const email = escapeHtml(bu.email);
+                                    const phoneNumber = escapeHtml(bu.phoneNumber);
+
+                                    const statusBadge = Number(bu.status) === 1
+                                        ? '<span class="badge bg-success">Active</span>'
+                                        : '<span class="badge bg-secondary">Inactive</span>';
+
+                                    html += '<tr>';
+                                    html += '<td>' + id + '</td>';
+                                    html += '<td>' + idBussinessUnit + '</td>';
+                                    html += '<td>' + idCompany + '</td>';
+                                    html += '<td>' + code + '</td>';
+                                    html += '<td>' + name + '</td>';
+                                    html += '<td>' + idCountry + '</td>';
+                                    html += '<td>' + idProvince + '</td>';
+                                    html += '<td>' + idCity + '</td>';
+                                    html += '<td>' + email + '</td>';
+                                    html += '<td>' + phoneNumber + '</td>';
+                                    html += '<td>' + statusBadge + '</td>';
+                                    html += '<td><a class="btn btn-outline-secondary btn-sm" href="/business-units/' + id + '/edit">Edit</a></td>';
+                                    html += '</tr>';
+                                });
+                            }
+
+                            html += '</tbody>';
+                            html += '</table>';
+                            html += '</div>';
+
+                            $('#printTable').html(html);
+                        }
+
+                        function filterData(keyword) {
+                            const normalizedKeyword = (keyword || '').toString().trim().toLowerCase();
+
+                            if (!normalizedKeyword) {
+                                return businessUnitData;
+                            }
+
+                            return businessUnitData.filter(function (bu) {
+                                return [
+                                    bu.id,
+                                    bu.idBussinessUnit,
+                                    bu.idCompany,
+                                    bu.code,
+                                    bu.name,
+                                    bu.idCountry,
+                                    bu.idProvince,
+                                    bu.idCity,
+                                    bu.email,
+                                    bu.phoneNumber,
+                                    Number(bu.status) === 1 ? 'active' : 'inactive'
+                                ].some(function (field) {
+                                    return (field || '').toString().toLowerCase().includes(normalizedKeyword);
+                                });
+                            });
+                        }
+
+                        function applySearch() {
+                            const keyword = $('#search').val();
+                            const filtered = filterData(keyword);
+                            renderTable(filtered);
+                        }
+
+                        renderTable(businessUnitData);
+
+                        $('#btnSearch').on('click', function () {
+                            applySearch();
+                        });
+
+                        $('#search').on('keyup', function (e) {
+                            if (e.key === 'Enter') {
+                                applySearch();
+                                return;
+                            }
+                            applySearch();
+                        });
+
+                        $('#btnResetSearch').on('click', function () {
+                            $('#search').val('');
+                            renderTable(businessUnitData);
+                        });
+                    });
                 </script>
             </th:block>
         </div>
