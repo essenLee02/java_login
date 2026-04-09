@@ -1,4 +1,6 @@
 C:\Users\nigel\Documents\java-login-register\src\main\java\com\example\auth\AuthApplication.java
+C:\Users\nigel\Documents\java-login-register\src\main\java\com\example\auth\config\AuthInterceptor.java
+C:\Users\nigel\Documents\java-login-register\src\main\java\com\example\auth\config\WebConfig.java
 C:\Users\nigel\Documents\java-login-register\src\main\java\com\example\auth\controller\AuthController.java
 C:\Users\nigel\Documents\java-login-register\src\main\java\com\example\auth\controller\BusinessUnitController.java
 C:\Users\nigel\Documents\java-login-register\src\main\java\com\example\auth\controller\ItemController.java

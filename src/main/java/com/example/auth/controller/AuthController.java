@@ -41,10 +41,14 @@ public class AuthController {
             return "redirect:/login?error=Email atau password salah";
         }
 
-        // dipakai oleh menu lain (mis. /items) untuk validasi login
+        // dipakai oleh menu lain untuk validasi login
         session.setAttribute("userId", userOpt.get().getId());
         session.setAttribute("userEmail", userOpt.get().getEmail());
         session.setAttribute("userName", userOpt.get().getName());
+
+        // --> Masih belum ada relasi company, nanti kalau sudah ada tinggal ditambahkan saja
+        // session.setAttribute("idCompany", userOpt.get().getCompany());
+
         return "redirect:/dashboard";
     }
 

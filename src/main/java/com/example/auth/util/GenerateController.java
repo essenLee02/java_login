@@ -4,7 +4,12 @@ import java.util.Random;
 
 import jakarta.servlet.http.HttpSession;
 
+import org.slf4j.LoggerFactory;
+import org.slf4j.Logger;
+
 public class GenerateController {
+
+    private static final Logger log = LoggerFactory.getLogger(GenerateController.class);
 
     protected String generateRandomString(int length, String nama, long digitData) {
 
@@ -46,4 +51,32 @@ public class GenerateController {
     protected boolean isLoggedIn(HttpSession session) {
         return session != null && session.getAttribute("userId") != null;
     }
+
+    protected void showLogger(
+        String controller
+        , String message
+        , String type
+    ) {
+        String logType = type == null ? "info" : type.trim().toLowerCase();
+        String logMessage = "[" + controller.toUpperCase() + "] " + message;
+        
+        switch (logType) {
+            case "warn":
+                log.warn(logMessage);
+                break;
+            case "error":
+                log.error(logMessage);
+                break;
+            case "trace":
+                log.trace(logMessage);
+                break;
+            case "debug":
+                log.debug(logMessage);
+                break;
+            default:
+                log.info(logMessage);
+                break;
+        }
+    }
+    // End of GenerateController
 }

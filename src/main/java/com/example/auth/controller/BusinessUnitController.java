@@ -4,8 +4,6 @@ import com.example.auth.model.BusinessUnit;
 import com.example.auth.service.BusinessUnitService;
 import com.example.auth.util.GenerateController;
 import jakarta.servlet.http.HttpSession;
-
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -19,14 +17,10 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import java.time.LocalDate;
 import java.util.stream.IntStream;
 
-import org.slf4j.Logger;
-
 @Controller
 public class BusinessUnitController extends GenerateController {
 
     private final BusinessUnitService service;
-
-    private static final Logger log = LoggerFactory.getLogger(BusinessUnitController.class);
 
     @Value("${app.pagination.page-size:10}")
     private int defaultPageSize;
@@ -48,22 +42,33 @@ public class BusinessUnitController extends GenerateController {
 
     @GetMapping("/business-units")
     public String businessUnits(
-            Model model
-            , @RequestParam(name = "page", defaultValue = "0") int page
-            , @RequestParam(name = "size", required = false) Integer size
-            , @RequestParam(name = "search", defaultValue = "") String search
-            , HttpSession session
+            Model model,
+            @RequestParam(name = "page", defaultValue = "0") int page,
+            @RequestParam(name = "size", required = false) Integer size,
+            @RequestParam(name = "search", defaultValue = "") String search,
+            HttpSession session
     ) {
         if (!isLoggedIn(session)) {
-            log.warn("[BUSINESS_UNIT] Access denied to list page because user is not logged in.");
+            showLogger(
+                "BUSINESS_UNIT",
+                "Access denied to list page because user is not logged in.",
+                "warn"
+            );
             return "redirect:/login";
         }
 
-        String userName = session.getAttribute("userName") != null ? String.valueOf(session.getAttribute("userName")) : "Unknown";
-        log.info("[BUSINESS_UNIT] User {} opened Business Unit list page. page={}, size={}", userName, page, size);
+        String userName = session.getAttribute("userName") != null
+            ? String.valueOf(session.getAttribute("userName"))
+            : "Unknown";
+
+        String logMessage = "User %s opened Business Unit list page. page=%d, size=%s"
+            .formatted(userName, page, size);
+        showLogger("BUSINESS_UNIT", logMessage, "info");
 
         int pageSize = (size == null || size <= 0) ? defaultPageSize : size;
-        if (page < 0) { page = 0; }
+        if (page < 0) {
+            page = 0;
+        }
 
         search = emptyToEmpty(search);
 
@@ -94,12 +99,21 @@ public class BusinessUnitController extends GenerateController {
     @GetMapping("/business-units/new")
     public String newBusinessUnitForm(Model model, HttpSession session) {
         if (!isLoggedIn(session)) {
-            log.warn("[BUSINESS_UNIT] Access denied to list page because user is not logged in.");
+            showLogger(
+                "BUSINESS_UNIT",
+                "Access denied to create page because user is not logged in.",
+                "warn"
+            );
             return "redirect:/login";
         }
 
-        String userName = session.getAttribute("userName") != null ? String.valueOf(session.getAttribute("userName")) : "Unknown";
-        log.info("[BUSINESS_UNIT] User {} opened NEW Business Unit form.", userName);
+        String userName = session.getAttribute("userName") != null
+            ? String.valueOf(session.getAttribute("userName"))
+            : "Unknown";
+
+        String logMessage = "User %s opened NEW Business Unit form."
+            .formatted(userName);
+        showLogger("BUSINESS_UNIT", logMessage, "info");
 
         BusinessUnit businessUnit = new BusinessUnit();
         businessUnit.setStatus(1);
@@ -117,26 +131,31 @@ public class BusinessUnitController extends GenerateController {
             HttpSession session
     ) {
         if (!isLoggedIn(session)) {
-            log.warn("[BUSINESS_UNIT] Insert denied because user is not logged in.");
+            showLogger(
+                "BUSINESS_UNIT",
+                "Insert denied because user is not logged in.",
+                "warn"
+            );
             return "redirect:/login";
         }
 
-        String userName = session.getAttribute("userName") != null ? String.valueOf(session.getAttribute("userName")) : "Unknown";
-        
+        String userName = session.getAttribute("userName") != null
+            ? String.valueOf(session.getAttribute("userName"))
+            : "Unknown";
+
         try {
-            
             long totalByCompany = service.countAll("");
 
             String generatedId = generateRandomString(3, businessUnit.getName(), totalByCompany);
 
             businessUnit.setIdBussinessUnit(generatedId);
             businessUnit.setIdCompany(emptyToNull(businessUnit.getIdCompany()));
-            businessUnit.setCode(emptyToNull(businessUnit.getCode()));
-            businessUnit.setName(emptyToNull(businessUnit.getName()));
-            businessUnit.setAddress(emptyToNull(businessUnit.getAddress()));
-            businessUnit.setIdCountry(emptyToNull(businessUnit.getIdCountry()));
-            businessUnit.setIdProvince(emptyToNull(businessUnit.getIdProvince()));
-            businessUnit.setIdCity(emptyToNull(businessUnit.getIdCity()));
+            businessUnit.setCode(emptyToNull(businessUnit.getCode().toUpperCase()));
+            businessUnit.setName(emptyToNull(businessUnit.getName().toUpperCase()));
+            businessUnit.setAddress(emptyToNull(businessUnit.getAddress().toUpperCase()));
+            businessUnit.setIdCountry(emptyToNull(businessUnit.getIdCountry().toUpperCase()));
+            businessUnit.setIdProvince(emptyToNull(businessUnit.getIdProvince().toUpperCase()));
+            businessUnit.setIdCity(emptyToNull(businessUnit.getIdCity().toUpperCase()));
             businessUnit.setTaxNumber(emptyToNull(businessUnit.getTaxNumber()));
             businessUnit.setEmail(emptyToNull(businessUnit.getEmail()));
             businessUnit.setPhoneNumber(emptyToNull(businessUnit.getPhoneNumber()));
@@ -153,25 +172,26 @@ public class BusinessUnitController extends GenerateController {
 
             service.save(businessUnit);
 
-            log.info(
-                    "[BUSINESS_UNIT] INSERT SUCCESS by user {}. generatedId={}, code={}, name={}",
+            String logMessage = "INSERT SUCCESS by user %s. generatedId=%s, code=%s, name=%s"
+                .formatted(
                     userName,
                     businessUnit.getIdBussinessUnit(),
                     businessUnit.getCode(),
                     businessUnit.getName()
-            );
+                );
+            showLogger("BUSINESS_UNIT", logMessage, "info");
 
             ra.addFlashAttribute("success", "Business Unit saved successfully");
         } catch (Exception e) {
-            log.error(
-                    "[BUSINESS_UNIT] INSERT FAILED by user {}. code={}, name={}, error={}",
+            String logMessage = "INSERT FAILED by user %s. code=%s, name=%s, error=%s"
+                .formatted(
                     userName,
                     businessUnit.getCode(),
                     businessUnit.getName(),
-                    e.getMessage(),
-                    e
-            );
-            
+                    e.getMessage()
+                );
+            showLogger("BUSINESS_UNIT", logMessage, "error");
+
             ra.addFlashAttribute("error", "Failed to save Business Unit: " + e.getMessage());
             return "redirect:/business-units/new";
         }
@@ -187,29 +207,31 @@ public class BusinessUnitController extends GenerateController {
             HttpSession session
     ) {
         if (!isLoggedIn(session)) {
-            log.warn("[BUSINESS_UNIT] Edit denied because user is not logged in.");
+            String logMessage = "Edit denied because user is not logged in. id=%d"
+                .formatted(id);
+            showLogger("BUSINESS_UNIT", logMessage, "warn");
             return "redirect:/login";
         }
-        String userName = session.getAttribute("userName") != null ? String.valueOf(session.getAttribute("userName")) : "Unknown";
-        
-        try {
 
+        String userName = session.getAttribute("userName") != null
+            ? String.valueOf(session.getAttribute("userName"))
+            : "Unknown";
+
+        try {
             BusinessUnit businessUnit = service.findById(id);
             model.addAttribute("businessUnit", businessUnit);
             model.addAttribute("mode", "edit");
 
-            log.info("[BUSINESS_UNIT] User {} opened EDIT Business Unit form for ID {}", userName, id);
+            String logMessage = "User %s opened EDIT Business Unit form for ID %d"
+                .formatted(userName, id);
+            showLogger("BUSINESS_UNIT", logMessage, "info");
 
             return appLocation + "/BusinessUnit/business-unit-form";
         } catch (Exception e) {
-            log.error(
-                    "[BUSINESS_UNIT] FAILED opening edit page by user {}. id={}, error={}",
-                    userName,
-                    id,
-                    e.getMessage(),
-                    e
-            );    
-            
+            String logMessage = "FAILED opening edit page by user %s. id=%d, error=%s"
+                .formatted(userName, id, e.getMessage());
+            showLogger("BUSINESS_UNIT", logMessage, "error");
+
             ra.addFlashAttribute("error", "Business Unit not found");
             return "redirect:/business-units";
         }
@@ -223,10 +245,15 @@ public class BusinessUnitController extends GenerateController {
             HttpSession session
     ) {
         if (!isLoggedIn(session)) {
-            log.warn("[BUSINESS_UNIT] Update denied because user is not logged in. id={}", id);
+            String logMessage = "Update denied because user is not logged in. id=%d"
+                .formatted(id);
+            showLogger("BUSINESS_UNIT", logMessage, "warn");
             return "redirect:/login";
         }
-        String userName = session.getAttribute("userName") != null ? String.valueOf(session.getAttribute("userName")) : "Unknown";
+
+        String userName = session.getAttribute("userName") != null
+            ? String.valueOf(session.getAttribute("userName"))
+            : "Unknown";
 
         try {
             BusinessUnit existingBusinessUnit = service.findById(id);
@@ -238,11 +265,11 @@ public class BusinessUnitController extends GenerateController {
             // code tidak boleh diubah saat edit
             businessUnit.setCode(emptyToNull(existingBusinessUnit.getCode()));
 
-            businessUnit.setName(emptyToNull(businessUnit.getName()));
-            businessUnit.setAddress(emptyToNull(businessUnit.getAddress()));
-            businessUnit.setIdCountry(emptyToNull(businessUnit.getIdCountry()));
-            businessUnit.setIdProvince(emptyToNull(businessUnit.getIdProvince()));
-            businessUnit.setIdCity(emptyToNull(businessUnit.getIdCity()));
+            businessUnit.setName(emptyToNull(businessUnit.getName().toUpperCase()));
+            businessUnit.setAddress(emptyToNull(businessUnit.getAddress().toUpperCase()));
+            businessUnit.setIdCountry(emptyToNull(businessUnit.getIdCountry().toUpperCase()));
+            businessUnit.setIdProvince(emptyToNull(businessUnit.getIdProvince().toUpperCase()));
+            businessUnit.setIdCity(emptyToNull(businessUnit.getIdCity().toUpperCase()));
             businessUnit.setTaxNumber(emptyToNull(businessUnit.getTaxNumber()));
             businessUnit.setEmail(emptyToNull(businessUnit.getEmail()));
             businessUnit.setPhoneNumber(emptyToNull(businessUnit.getPhoneNumber()));
@@ -254,28 +281,29 @@ public class BusinessUnitController extends GenerateController {
             businessUnit.setDeletedBy(existingBusinessUnit.getDeletedBy());
 
             if (businessUnit.getStatus() == null) {
-                businessUnit.setStatus(existingBusinessUnit.getStatus() == null ? 1 : existingBusinessUnit.getStatus());
+                businessUnit.setStatus(
+                        existingBusinessUnit.getStatus() == null ? 1 : existingBusinessUnit.getStatus()
+                );
             }
 
             service.update(id, businessUnit);
 
-            log.info(
-                "[BUSINESS_UNIT] UPDATE SUCCESS by user {}. id={}, generatedId={}, code={}, name={}",
-                userName,
-                id,
-                businessUnit.getIdBussinessUnit(),
-                businessUnit.getCode(),
-                businessUnit.getName()
-            );
+            String logMessage = "UPDATE SUCCESS by user %s. id=%d, generatedId=%s, code=%s, name=%s"
+                .formatted(
+                    userName,
+                    id,
+                    businessUnit.getIdBussinessUnit(),
+                    businessUnit.getCode(),
+                    businessUnit.getName()
+                );
+            showLogger("BUSINESS_UNIT", logMessage, "info");
+
             ra.addFlashAttribute("success", "Business Unit updated successfully");
         } catch (Exception e) {
-            log.error(
-                "[BUSINESS_UNIT] FAILED to update Business Unit by user {}. id={}, error={}",
-                userName,
-                id,
-                e.getMessage(),
-                e
-            );
+            String logMessage = "FAILED to update Business Unit by user %s. id=%d, error=%s"
+                .formatted(userName, id, e.getMessage());
+            showLogger("BUSINESS_UNIT", logMessage, "error");
+
             ra.addFlashAttribute("error", "Failed to update Business Unit: " + e.getMessage());
             return "redirect:/business-units/" + id + "/edit";
         }
