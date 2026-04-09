@@ -11,7 +11,26 @@ public class GenerateController {
 
     private static final Logger log = LoggerFactory.getLogger(GenerateController.class);
 
-    protected String generateRandomString(int length, String nama, long digitData) {
+    protected boolean isLoggedIn(HttpSession session) {
+        return session != null && session.getAttribute("userId") != null;
+    }
+
+    public String isLogout(HttpSession session) {
+        session.invalidate();
+        return "redirect:/login";
+    }
+
+    protected String getLoginUserName(HttpSession session) {
+        return session.getAttribute("userName") != null
+            ? String.valueOf(session.getAttribute("userName"))
+            : "Unknown";
+    }
+
+    protected String generateRandomString(
+        int length
+        , String nama
+        , long digitData
+    ) {
 
         String characters = "0123456789abcdefghijklmnopqrstuvwxyz";
         String digits = "000000";
@@ -46,10 +65,6 @@ public class GenerateController {
         }
 
         return (randomString.toString() + namaPrefix + digits).toUpperCase();
-    }
-
-    protected boolean isLoggedIn(HttpSession session) {
-        return session != null && session.getAttribute("userId") != null;
     }
 
     protected void showLogger(

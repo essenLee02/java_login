@@ -57,10 +57,7 @@ public class BusinessUnitController extends GenerateController {
             return "redirect:/login";
         }
 
-        String userName = session.getAttribute("userName") != null
-            ? String.valueOf(session.getAttribute("userName"))
-            : "Unknown";
-
+        String userName = getLoginUserName(session);
         String logMessage = "User %s opened Business Unit list page. page=%d, size=%s"
             .formatted(userName, page, size);
         showLogger("BUSINESS_UNIT", logMessage, "info");
@@ -107,10 +104,7 @@ public class BusinessUnitController extends GenerateController {
             return "redirect:/login";
         }
 
-        String userName = session.getAttribute("userName") != null
-            ? String.valueOf(session.getAttribute("userName"))
-            : "Unknown";
-
+        String userName = getLoginUserName(session);
         String logMessage = "User %s opened NEW Business Unit form."
             .formatted(userName);
         showLogger("BUSINESS_UNIT", logMessage, "info");
@@ -139,9 +133,7 @@ public class BusinessUnitController extends GenerateController {
             return "redirect:/login";
         }
 
-        String userName = session.getAttribute("userName") != null
-            ? String.valueOf(session.getAttribute("userName"))
-            : "Unknown";
+        String userName = getLoginUserName(session);
 
         try {
             long totalByCompany = service.countAll("");
@@ -213,9 +205,7 @@ public class BusinessUnitController extends GenerateController {
             return "redirect:/login";
         }
 
-        String userName = session.getAttribute("userName") != null
-            ? String.valueOf(session.getAttribute("userName"))
-            : "Unknown";
+        String userName = getLoginUserName(session);
 
         try {
             BusinessUnit businessUnit = service.findById(id);
@@ -251,9 +241,7 @@ public class BusinessUnitController extends GenerateController {
             return "redirect:/login";
         }
 
-        String userName = session.getAttribute("userName") != null
-            ? String.valueOf(session.getAttribute("userName"))
-            : "Unknown";
+        String userName = getLoginUserName(session);
 
         try {
             BusinessUnit existingBusinessUnit = service.findById(id);
