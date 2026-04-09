@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head(${mode} == 'edit' ? 'Edit Province' : 'New Province')}"></head>
+<body>
+<div class="wrapper">
+    <div th:replace="~{fragments/layout :: sidebar}"></div>
+    <div class="main">
+        <main class="content">
+            <div class="container-fluid p-0" style="max-width: 900px;">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <h3 th:text="${mode} == 'edit' ? 'Edit Province' : 'New Province'}"></h3>
+                    <a class="btn btn-outline-secondary" th:href="@{/provinces}">Back</a>
+                </div>
+
+                <div th:if="${error}" class="alert alert-danger" th:text="${error}"></div>
+
+                <div class="card">
+                    <div class="card-body">
+                        <form method="post" th:action="${mode} == 'edit' ? @{/provinces/{id}(id=${province.id})} : @{/provinces}" class="row g-3">
+                            <div class="col-md-6">
+                                <label class="form-label">ID Province</label>
+                                <input type="text" class="form-control" th:value="${mode} == 'edit' ? province.idProvince : 'AUTO GENERATED'}" readonly>
+                            </div>
+
+                            <div class="col-md-6">
+                                <label class="form-label">Country</label>
+                                <select name="idCountry" class="form-select" required>
+                                    <option value="">Select Country</option>
+                                    <option th:each="c : ${countries}" th:value="${c.idCountry}" th:text="${c.name}" th:selected="${c.idCountry == province.idCountry}"></option>
+                                </select>
+                            </div>
+
+                            <div class="col-md-6">
+                                <label class="form-label">Code</label>
+                                <input type="text" name="code" class="form-control" th:value="${province.code}">
+                            </div>
+
+                            <div class="col-md-6">
+                                <label class="form-label">Name</label>
+                                <input type="text" name="name" class="form-control" th:value="${province.name}" required>
+                            </div>
+
+                            <div class="col-md-6">
+                                <label class="form-label">Status</label>
+                                <select name="status" class="form-select">
+                                    <option value="1" th:selected="${province.status == 1}">Active</option>
+                                    <option value="0" th:selected="${province.status == 0}">Inactive</option>
+                                </select>
+                            </div>
+
+                            <div class="col-12 d-flex gap-2">
+                                <button type="submit" class="btn btn-primary" th:text="${mode} == 'edit' ? 'Save Changes' : 'Create Province'}"></button>
+                                <a class="btn btn-outline-secondary" th:href="@{/provinces}">Cancel</a>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+</div>
+<div th:replace="~{fragments/layout :: scripts(~{::extraScripts})}">
+    <th:block th:fragment="extraScripts"></th:block>
+</div>
+</body>
+</html>
