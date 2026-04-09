@@ -40,7 +40,14 @@ public class CountryController extends GenerateController {
             @RequestParam(name = "search", defaultValue = "") String search,
             HttpSession session
     ) {
-        if (!isLoggedIn(session)) return "redirect:/login";
+        if (!isLoggedIn(session)) {
+            showLogger(
+                "COUNTRY",
+                "Access denied to list page because user is not logged in.",
+                "warn"
+            );
+            return "redirect:/login";
+        }
 
         int pageSize = (size == null || size <= 0) ? defaultPageSize : size;
         long totalElements = service.countAll(search);
@@ -64,7 +71,14 @@ public class CountryController extends GenerateController {
 
     @GetMapping("/countries/new")
     public String newForm(Model model, HttpSession session) {
-        if (!isLoggedIn(session)) return "redirect:/login";
+        if (!isLoggedIn(session)) {
+            showLogger(
+                "COUNTRY",
+                "Access denied to list page because user is not logged in.",
+                "warn"
+            );
+            return "redirect:/login";
+        }
 
         Country country = new Country();
         country.setStatus(1);
@@ -80,7 +94,14 @@ public class CountryController extends GenerateController {
             RedirectAttributes ra,
             HttpSession session
     ) {
-        if (!isLoggedIn(session)) return "redirect:/login";
+        if (!isLoggedIn(session)) {
+            showLogger(
+                "COUNTRY",
+                "Access denied to list page because user is not logged in.",
+                "warn"
+            );
+            return "redirect:/login";
+        }
 
         country.setCode(emptyToNull(country.getCode()));
         country.setName(emptyToNull(country.getName()));
@@ -109,7 +130,14 @@ public class CountryController extends GenerateController {
 
     @GetMapping("/countries/{id}/edit")
     public String editForm(@PathVariable Long id, Model model, RedirectAttributes ra, HttpSession session) {
-        if (!isLoggedIn(session)) return "redirect:/login";
+        if (!isLoggedIn(session)) {
+            showLogger(
+                "COUNTRY",
+                "Access denied to list page because user is not logged in.",
+                "warn"
+            );
+            return "redirect:/login";
+        }
 
         try {
             model.addAttribute("country", service.findById(id));
@@ -128,7 +156,14 @@ public class CountryController extends GenerateController {
             RedirectAttributes ra,
             HttpSession session
     ) {
-        if (!isLoggedIn(session)) return "redirect:/login";
+        if (!isLoggedIn(session)) {
+            showLogger(
+                "COUNTRY",
+                "Access denied to list page because user is not logged in.",
+                "warn"
+            );
+            return "redirect:/login";
+        }
 
         Country existing = service.findById(id);
 
