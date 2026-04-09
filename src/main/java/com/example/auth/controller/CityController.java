@@ -55,6 +55,10 @@ public class CityController extends GenerateController {
         return (value == null || value.trim().isEmpty()) ? null : value.trim();
     }
 
+    private String emptyToEmpty(String value) {
+        return value == null ? "" : value.trim();
+    }
+
     @GetMapping("/cities")
     public String cities(
             Model model,
@@ -63,15 +67,37 @@ public class CityController extends GenerateController {
             @RequestParam(name = "search", defaultValue = "") String search,
             HttpSession session
     ) {
-        if (!isLoggedIn(session)) return "redirect:/login";
+        if (!isLoggedIn(session)) {
+            showLogger(
+                "CITY",
+                "Access denied to list page because user is not logged in.",
+                "warn"
+            );
+            return "redirect:/login";
+        }
+
+        String userName = getLoginUserName(session);
+        String logMessage = "User %s opened City list page. page=%d, size=%s"
+            .formatted(userName, page, size);
+        showLogger("CITY", logMessage, "info");
 
         int pageSize = (size == null || size <= 0) ? defaultPageSize : size;
+        if (page < 0) {
+            page = 0;
+        }
+
+        search = emptyToEmpty(search);
+
         long totalElements = service.countAll(search);
         int totalPages = (int) Math.ceil(totalElements / (double) pageSize);
 
-        if (totalPages <= 0) totalPages = 1;
-        if (page < 0) page = 0;
-        if (page > totalPages - 1) page = totalPages - 1;
+        if (totalPages <= 0) {
+            totalPages = 1;
+        }
+
+        if (page > totalPages - 1) {
+            page = totalPages - 1;
+        }
 
         model.addAttribute("cities", service.getPage(search, page, pageSize));
         model.addAttribute("search", search);
@@ -88,7 +114,19 @@ public class CityController extends GenerateController {
 
     @GetMapping("/cities/new")
     public String newForm(Model model, HttpSession session) {
-        if (!isLoggedIn(session)) return "redirect:/login";
+        if (!isLoggedIn(session)) {
+            showLogger(
+                "CITY",
+                "Access denied to create page because user is not logged in.",
+                "warn"
+            );
+            return "redirect:/login";
+        }
+
+        String userName = getLoginUserName(session);
+        String logMessage = "User %s opened NEW City form."
+            .formatted(userName);
+        showLogger("CITY", logMessage, "info");
 
         City city = new City();
         city.setStatus(1);
@@ -105,32 +143,73 @@ public class CityController extends GenerateController {
             RedirectAttributes ra,
             HttpSession session
     ) {
-        if (!isLoggedIn(session)) return "redirect:/login";
-
-        city.setIdCountry(emptyToNull(city.getIdCountry()));
-        city.setIdProvince(emptyToNull(city.getIdProvince()));
-        city.setCode(emptyToNull(city.getCode()));
-        city.setName(emptyToNull(city.getName()));
-
-        String validation = service.validate(city, null);
-        if (validation != null) {
-            ra.addFlashAttribute("error", validation);
-            return "redirect:/cities/new";
+        if (!isLoggedIn(session)) {
+            showLogger(
+                "CITY",
+                "Insert denied because user is not logged in.",
+                "warn"
+            );
+            return "redirect:/login";
         }
 
-        long totalData = service.countAll("");
-        city.setIdCity(generateRandomString(3, city.getName(), totalData));
-        city.setCreatedDate(LocalDate.now().toString());
-        city.setCreatedBy(String.valueOf(session.getAttribute("userId")));
-        city.setUpdatedDate(LocalDate.now().toString());
-        city.setUpdatedBy(String.valueOf(session.getAttribute("userId")));
-        city.setDeletedDate(null);
-        city.setDeletedBy(null);
+        String userName = getLoginUserName(session);
 
-        if (city.getStatus() == null) city.setStatus(1);
+        try {
+            city.setIdCountry(emptyToNull(city.getIdCountry()));
+            city.setIdProvince(emptyToNull(city.getIdProvince()));
+            city.setCode(emptyToNull(city.getCode() == null ? null : city.getCode().toUpperCase()));
+            city.setName(emptyToNull(city.getName() == null ? null : city.getName().toUpperCase()));
 
-        service.save(city);
-        ra.addFlashAttribute("success", "City saved successfully");
+            String validation = service.validate(city, null);
+            if (validation != null) {
+                String logMessage = "INSERT FAILED by user %s. validation=%s"
+                    .formatted(userName, validation);
+                showLogger("CITY", logMessage, "warn");
+
+                ra.addFlashAttribute("error", validation);
+                return "redirect:/cities/new";
+            }
+
+            long totalData = service.countAll("");
+            city.setIdCity(generateRandomString(3, city.getName(), totalData));
+            city.setCreatedDate(LocalDate.now().toString());
+            city.setCreatedBy(String.valueOf(session.getAttribute("userId")));
+            city.setUpdatedDate(LocalDate.now().toString());
+            city.setUpdatedBy(String.valueOf(session.getAttribute("userId")));
+            city.setDeletedDate(null);
+            city.setDeletedBy(null);
+
+            if (city.getStatus() == null) {
+                city.setStatus(1);
+            }
+
+            service.save(city);
+
+            String logMessage = "INSERT SUCCESS by user %s. generatedId=%s, idCountry=%s, idProvince=%s, code=%s, name=%s"
+                .formatted(
+                    userName,
+                    city.getIdCity(),
+                    city.getIdCountry(),
+                    city.getIdProvince(),
+                    city.getCode(),
+                    city.getName()
+                );
+            showLogger("CITY", logMessage, "info");
+
+            ra.addFlashAttribute("success", "City saved successfully");
+        } catch (Exception e) {
+            String logMessage = "INSERT FAILED by user %s. code=%s, name=%s, error=%s"
+                .formatted(
+                    userName,
+                    city.getCode(),
+                    city.getName(),
+                    e.getMessage()
+                );
+            showLogger("CITY", logMessage, "error");
+
+            ra.addFlashAttribute("error", "Failed to save City: " + e.getMessage());
+            return "redirect:/cities/new";
+        }
 
         return "redirect:/cities";
     }
@@ -142,15 +221,30 @@ public class CityController extends GenerateController {
             RedirectAttributes ra,
             HttpSession session
     ) {
-        if (!isLoggedIn(session)) return "redirect:/login";
+        if (!isLoggedIn(session)) {
+            String logMessage = "Edit denied because user is not logged in. id=%d"
+                .formatted(id);
+            showLogger("CITY", logMessage, "warn");
+            return "redirect:/login";
+        }
+
+        String userName = getLoginUserName(session);
 
         try {
             City city = service.findById(id);
             model.addAttribute("city", city);
             model.addAttribute("mode", "edit");
 
+            String logMessage = "User %s opened EDIT City form for ID %d"
+                .formatted(userName, id);
+            showLogger("CITY", logMessage, "info");
+
             return appLocation + "/City/city-form";
         } catch (Exception e) {
+            String logMessage = "FAILED opening edit page by user %s. id=%d, error=%s"
+                .formatted(userName, id, e.getMessage());
+            showLogger("CITY", logMessage, "error");
+
             ra.addFlashAttribute("error", "City not found");
             return "redirect:/cities";
         }
@@ -163,35 +257,68 @@ public class CityController extends GenerateController {
             RedirectAttributes ra,
             HttpSession session
     ) {
-        if (!isLoggedIn(session)) return "redirect:/login";
+        if (!isLoggedIn(session)) {
+            String logMessage = "Update denied because user is not logged in. id=%d"
+                .formatted(id);
+            showLogger("CITY", logMessage, "warn");
+            return "redirect:/login";
+        }
 
-        City existing = service.findById(id);
+        String userName = getLoginUserName(session);
 
-        city.setId(id);
-        city.setIdCity(existing.getIdCity());
-        city.setIdCountry(emptyToNull(city.getIdCountry()));
-        city.setIdProvince(emptyToNull(city.getIdProvince()));
-        city.setCode(emptyToNull(city.getCode()));
-        city.setName(emptyToNull(city.getName()));
-        city.setCreatedDate(existing.getCreatedDate());
-        city.setCreatedBy(existing.getCreatedBy());
-        city.setUpdatedDate(LocalDate.now().toString());
-        city.setUpdatedBy(String.valueOf(session.getAttribute("userId")));
-        city.setDeletedDate(existing.getDeletedDate());
-        city.setDeletedBy(existing.getDeletedBy());
+        try {
+            City existing = service.findById(id);
 
-        String validation = service.validate(city, id);
-        if (validation != null) {
-            ra.addFlashAttribute("error", validation);
+            city.setId(id);
+            city.setIdCity(existing.getIdCity());
+            city.setIdCountry(emptyToNull(city.getIdCountry()));
+            city.setIdProvince(emptyToNull(city.getIdProvince()));
+            city.setCode(emptyToNull(city.getCode() == null ? null : city.getCode().toUpperCase()));
+            city.setName(emptyToNull(city.getName() == null ? null : city.getName().toUpperCase()));
+            city.setCreatedDate(existing.getCreatedDate());
+            city.setCreatedBy(existing.getCreatedBy());
+            city.setUpdatedDate(LocalDate.now().toString());
+            city.setUpdatedBy(String.valueOf(session.getAttribute("userId")));
+            city.setDeletedDate(existing.getDeletedDate());
+            city.setDeletedBy(existing.getDeletedBy());
+
+            String validation = service.validate(city, id);
+            if (validation != null) {
+                String logMessage = "UPDATE FAILED by user %s. id=%d, validation=%s"
+                    .formatted(userName, id, validation);
+                showLogger("CITY", logMessage, "warn");
+
+                ra.addFlashAttribute("error", validation);
+                return "redirect:/cities/" + id + "/edit";
+            }
+
+            if (city.getStatus() == null) {
+                city.setStatus(existing.getStatus() == null ? 1 : existing.getStatus());
+            }
+
+            service.update(id, city);
+
+            String logMessage = "UPDATE SUCCESS by user %s. id=%d, generatedId=%s, idCountry=%s, idProvince=%s, code=%s, name=%s"
+                .formatted(
+                    userName,
+                    id,
+                    city.getIdCity(),
+                    city.getIdCountry(),
+                    city.getIdProvince(),
+                    city.getCode(),
+                    city.getName()
+                );
+            showLogger("CITY", logMessage, "info");
+
+            ra.addFlashAttribute("success", "City updated successfully");
+        } catch (Exception e) {
+            String logMessage = "FAILED to update City by user %s. id=%d, error=%s"
+                .formatted(userName, id, e.getMessage());
+            showLogger("CITY", logMessage, "error");
+
+            ra.addFlashAttribute("error", "Failed to update City: " + e.getMessage());
             return "redirect:/cities/" + id + "/edit";
         }
-
-        if (city.getStatus() == null) {
-            city.setStatus(existing.getStatus());
-        }
-
-        service.update(id, city);
-        ra.addFlashAttribute("success", "City updated successfully");
 
         return "redirect:/cities";
     }

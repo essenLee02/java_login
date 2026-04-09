@@ -46,6 +46,10 @@ public class ProvinceController extends GenerateController {
         return (value == null || value.trim().isEmpty()) ? null : value.trim();
     }
 
+    private String emptyToEmpty(String value) {
+        return value == null ? "" : value.trim();
+    }
+
     @GetMapping("/provinces")
     public String provinces(
             Model model,
@@ -54,15 +58,37 @@ public class ProvinceController extends GenerateController {
             @RequestParam(name = "search", defaultValue = "") String search,
             HttpSession session
     ) {
-        if (!isLoggedIn(session)) return "redirect:/login";
+        if (!isLoggedIn(session)) {
+            showLogger(
+                "PROVINCE",
+                "Access denied to list page because user is not logged in.",
+                "warn"
+            );
+            return "redirect:/login";
+        }
+
+        String userName = getLoginUserName(session);
+        String logMessage = "User %s opened Province list page. page=%d, size=%s"
+            .formatted(userName, page, size);
+        showLogger("PROVINCE", logMessage, "info");
 
         int pageSize = (size == null || size <= 0) ? defaultPageSize : size;
+        if (page < 0) {
+            page = 0;
+        }
+
+        search = emptyToEmpty(search);
+
         long totalElements = service.countAll(search);
         int totalPages = (int) Math.ceil(totalElements / (double) pageSize);
 
-        if (totalPages <= 0) totalPages = 1;
-        if (page < 0) page = 0;
-        if (page > totalPages - 1) page = totalPages - 1;
+        if (totalPages <= 0) {
+            totalPages = 1;
+        }
+
+        if (page > totalPages - 1) {
+            page = totalPages - 1;
+        }
 
         model.addAttribute("provinces", service.getPage(search, page, pageSize));
         model.addAttribute("search", search);
@@ -79,7 +105,19 @@ public class ProvinceController extends GenerateController {
 
     @GetMapping("/provinces/new")
     public String newForm(Model model, HttpSession session) {
-        if (!isLoggedIn(session)) return "redirect:/login";
+        if (!isLoggedIn(session)) {
+            showLogger(
+                "PROVINCE",
+                "Access denied to create page because user is not logged in.",
+                "warn"
+            );
+            return "redirect:/login";
+        }
+
+        String userName = getLoginUserName(session);
+        String logMessage = "User %s opened NEW Province form."
+            .formatted(userName);
+        showLogger("PROVINCE", logMessage, "info");
 
         Province province = new Province();
         province.setStatus(1);
@@ -96,31 +134,71 @@ public class ProvinceController extends GenerateController {
             RedirectAttributes ra,
             HttpSession session
     ) {
-        if (!isLoggedIn(session)) return "redirect:/login";
-
-        province.setIdCountry(emptyToNull(province.getIdCountry()));
-        province.setCode(emptyToNull(province.getCode()));
-        province.setName(emptyToNull(province.getName()));
-
-        String validation = service.validate(province, null);
-        if (validation != null) {
-            ra.addFlashAttribute("error", validation);
-            return "redirect:/provinces/new";
+        if (!isLoggedIn(session)) {
+            showLogger(
+                "PROVINCE",
+                "Insert denied because user is not logged in.",
+                "warn"
+            );
+            return "redirect:/login";
         }
 
-        long totalData = service.countAll("");
-        province.setIdProvince(generateRandomString(3, province.getName(), totalData));
-        province.setCreatedDate(LocalDate.now().toString());
-        province.setCreatedBy(String.valueOf(session.getAttribute("userId")));
-        province.setUpdatedDate(LocalDate.now().toString());
-        province.setUpdatedBy(String.valueOf(session.getAttribute("userId")));
-        province.setDeletedDate(null);
-        province.setDeletedBy(null);
+        String userName = getLoginUserName(session);
 
-        if (province.getStatus() == null) province.setStatus(1);
+        try {
+            province.setIdCountry(emptyToNull(province.getIdCountry()));
+            province.setCode(emptyToNull(province.getCode() == null ? null : province.getCode().toUpperCase()));
+            province.setName(emptyToNull(province.getName() == null ? null : province.getName().toUpperCase()));
 
-        service.save(province);
-        ra.addFlashAttribute("success", "Province saved successfully");
+            String validation = service.validate(province, null);
+            if (validation != null) {
+                String logMessage = "INSERT FAILED by user %s. validation=%s"
+                    .formatted(userName, validation);
+                showLogger("PROVINCE", logMessage, "warn");
+
+                ra.addFlashAttribute("error", validation);
+                return "redirect:/provinces/new";
+            }
+
+            long totalData = service.countAll("");
+            province.setIdProvince(generateRandomString(3, province.getName(), totalData));
+            province.setCreatedDate(LocalDate.now().toString());
+            province.setCreatedBy(String.valueOf(session.getAttribute("userId")));
+            province.setUpdatedDate(LocalDate.now().toString());
+            province.setUpdatedBy(String.valueOf(session.getAttribute("userId")));
+            province.setDeletedDate(null);
+            province.setDeletedBy(null);
+
+            if (province.getStatus() == null) {
+                province.setStatus(1);
+            }
+
+            service.save(province);
+
+            String logMessage = "INSERT SUCCESS by user %s. generatedId=%s, idCountry=%s, code=%s, name=%s"
+                .formatted(
+                    userName,
+                    province.getIdProvince(),
+                    province.getIdCountry(),
+                    province.getCode(),
+                    province.getName()
+                );
+            showLogger("PROVINCE", logMessage, "info");
+
+            ra.addFlashAttribute("success", "Province saved successfully");
+        } catch (Exception e) {
+            String logMessage = "INSERT FAILED by user %s. code=%s, name=%s, error=%s"
+                .formatted(
+                    userName,
+                    province.getCode(),
+                    province.getName(),
+                    e.getMessage()
+                );
+            showLogger("PROVINCE", logMessage, "error");
+
+            ra.addFlashAttribute("error", "Failed to save Province: " + e.getMessage());
+            return "redirect:/provinces/new";
+        }
 
         return "redirect:/provinces";
     }
@@ -132,15 +210,30 @@ public class ProvinceController extends GenerateController {
             RedirectAttributes ra,
             HttpSession session
     ) {
-        if (!isLoggedIn(session)) return "redirect:/login";
+        if (!isLoggedIn(session)) {
+            String logMessage = "Edit denied because user is not logged in. id=%d"
+                .formatted(id);
+            showLogger("PROVINCE", logMessage, "warn");
+            return "redirect:/login";
+        }
+
+        String userName = getLoginUserName(session);
 
         try {
             Province province = service.findById(id);
             model.addAttribute("province", province);
             model.addAttribute("mode", "edit");
 
+            String logMessage = "User %s opened EDIT Province form for ID %d"
+                .formatted(userName, id);
+            showLogger("PROVINCE", logMessage, "info");
+
             return appLocation + "/Province/province-form";
         } catch (Exception e) {
+            String logMessage = "FAILED opening edit page by user %s. id=%d, error=%s"
+                .formatted(userName, id, e.getMessage());
+            showLogger("PROVINCE", logMessage, "error");
+
             ra.addFlashAttribute("error", "Province not found");
             return "redirect:/provinces";
         }
@@ -153,34 +246,66 @@ public class ProvinceController extends GenerateController {
             RedirectAttributes ra,
             HttpSession session
     ) {
-        if (!isLoggedIn(session)) return "redirect:/login";
+        if (!isLoggedIn(session)) {
+            String logMessage = "Update denied because user is not logged in. id=%d"
+                .formatted(id);
+            showLogger("PROVINCE", logMessage, "warn");
+            return "redirect:/login";
+        }
 
-        Province existing = service.findById(id);
+        String userName = getLoginUserName(session);
 
-        province.setId(id);
-        province.setIdProvince(existing.getIdProvince());
-        province.setIdCountry(emptyToNull(province.getIdCountry()));
-        province.setCode(emptyToNull(province.getCode()));
-        province.setName(emptyToNull(province.getName()));
-        province.setCreatedDate(existing.getCreatedDate());
-        province.setCreatedBy(existing.getCreatedBy());
-        province.setUpdatedDate(LocalDate.now().toString());
-        province.setUpdatedBy(String.valueOf(session.getAttribute("userId")));
-        province.setDeletedDate(existing.getDeletedDate());
-        province.setDeletedBy(existing.getDeletedBy());
+        try {
+            Province existing = service.findById(id);
 
-        String validation = service.validate(province, id);
-        if (validation != null) {
-            ra.addFlashAttribute("error", validation);
+            province.setId(id);
+            province.setIdProvince(existing.getIdProvince());
+            province.setIdCountry(emptyToNull(province.getIdCountry()));
+            province.setCode(emptyToNull(province.getCode() == null ? null : province.getCode().toUpperCase()));
+            province.setName(emptyToNull(province.getName() == null ? null : province.getName().toUpperCase()));
+            province.setCreatedDate(existing.getCreatedDate());
+            province.setCreatedBy(existing.getCreatedBy());
+            province.setUpdatedDate(LocalDate.now().toString());
+            province.setUpdatedBy(String.valueOf(session.getAttribute("userId")));
+            province.setDeletedDate(existing.getDeletedDate());
+            province.setDeletedBy(existing.getDeletedBy());
+
+            String validation = service.validate(province, id);
+            if (validation != null) {
+                String logMessage = "UPDATE FAILED by user %s. id=%d, validation=%s"
+                    .formatted(userName, id, validation);
+                showLogger("PROVINCE", logMessage, "warn");
+
+                ra.addFlashAttribute("error", validation);
+                return "redirect:/provinces/" + id + "/edit";
+            }
+
+            if (province.getStatus() == null) {
+                province.setStatus(existing.getStatus() == null ? 1 : existing.getStatus());
+            }
+
+            service.update(id, province);
+
+            String logMessage = "UPDATE SUCCESS by user %s. id=%d, generatedId=%s, idCountry=%s, code=%s, name=%s"
+                .formatted(
+                    userName,
+                    id,
+                    province.getIdProvince(),
+                    province.getIdCountry(),
+                    province.getCode(),
+                    province.getName()
+                );
+            showLogger("PROVINCE", logMessage, "info");
+
+            ra.addFlashAttribute("success", "Province updated successfully");
+        } catch (Exception e) {
+            String logMessage = "FAILED to update Province by user %s. id=%d, error=%s"
+                .formatted(userName, id, e.getMessage());
+            showLogger("PROVINCE", logMessage, "error");
+
+            ra.addFlashAttribute("error", "Failed to update Province: " + e.getMessage());
             return "redirect:/provinces/" + id + "/edit";
         }
-
-        if (province.getStatus() == null) {
-            province.setStatus(existing.getStatus());
-        }
-
-        service.update(id, province);
-        ra.addFlashAttribute("success", "Province updated successfully");
 
         return "redirect:/provinces";
     }
