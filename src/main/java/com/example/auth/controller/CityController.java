@@ -11,7 +11,11 @@ import jakarta.servlet.http.HttpSession;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.time.LocalDate;
@@ -64,6 +68,7 @@ public class CityController extends GenerateController {
         int pageSize = (size == null || size <= 0) ? defaultPageSize : size;
         long totalElements = service.countAll(search);
         int totalPages = (int) Math.ceil(totalElements / (double) pageSize);
+
         if (totalPages <= 0) totalPages = 1;
         if (page < 0) page = 0;
         if (page > totalPages - 1) page = totalPages - 1;
@@ -90,6 +95,7 @@ public class CityController extends GenerateController {
 
         model.addAttribute("city", city);
         model.addAttribute("mode", "new");
+
         return appLocation + "/City/city-form";
     }
 
@@ -125,16 +131,24 @@ public class CityController extends GenerateController {
 
         service.save(city);
         ra.addFlashAttribute("success", "City saved successfully");
+
         return "redirect:/cities";
     }
 
     @GetMapping("/cities/{id}/edit")
-    public String editForm(@PathVariable Long id, Model model, RedirectAttributes ra, HttpSession session) {
+    public String editForm(
+            @PathVariable Long id,
+            Model model,
+            RedirectAttributes ra,
+            HttpSession session
+    ) {
         if (!isLoggedIn(session)) return "redirect:/login";
 
         try {
-            model.addAttribute("city", service.findById(id));
+            City city = service.findById(id);
+            model.addAttribute("city", city);
             model.addAttribute("mode", "edit");
+
             return appLocation + "/City/city-form";
         } catch (Exception e) {
             ra.addFlashAttribute("error", "City not found");
@@ -172,10 +186,13 @@ public class CityController extends GenerateController {
             return "redirect:/cities/" + id + "/edit";
         }
 
-        if (city.getStatus() == null) city.setStatus(existing.getStatus());
+        if (city.getStatus() == null) {
+            city.setStatus(existing.getStatus());
+        }
 
         service.update(id, city);
         ra.addFlashAttribute("success", "City updated successfully");
+
         return "redirect:/cities";
     }
 }

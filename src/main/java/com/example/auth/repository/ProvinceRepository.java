@@ -49,7 +49,11 @@ public class ProvinceRepository {
         String s = "%" + (search == null ? "" : search.trim()) + "%";
 
         String sql = """
-            SELECT p.*, c.name AS country_name
+            SELECT
+                p.*
+                , c.id_country AS country_id
+                , c.code AS country_code
+                , c.name AS country_name
             FROM provinces p
             LEFT JOIN countries c ON c.id_country = p.id_country
             WHERE (? = '' OR IFNULL(p.code, '') LIKE ? OR p.name LIKE ? OR IFNULL(c.name, '') LIKE ?)

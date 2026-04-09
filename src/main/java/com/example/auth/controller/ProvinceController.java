@@ -9,7 +9,11 @@ import jakarta.servlet.http.HttpSession;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.time.LocalDate;
@@ -55,6 +59,7 @@ public class ProvinceController extends GenerateController {
         int pageSize = (size == null || size <= 0) ? defaultPageSize : size;
         long totalElements = service.countAll(search);
         int totalPages = (int) Math.ceil(totalElements / (double) pageSize);
+
         if (totalPages <= 0) totalPages = 1;
         if (page < 0) page = 0;
         if (page > totalPages - 1) page = totalPages - 1;
@@ -81,6 +86,7 @@ public class ProvinceController extends GenerateController {
 
         model.addAttribute("province", province);
         model.addAttribute("mode", "new");
+
         return appLocation + "/Province/province-form";
     }
 
@@ -115,16 +121,24 @@ public class ProvinceController extends GenerateController {
 
         service.save(province);
         ra.addFlashAttribute("success", "Province saved successfully");
+
         return "redirect:/provinces";
     }
 
     @GetMapping("/provinces/{id}/edit")
-    public String editForm(@PathVariable Long id, Model model, RedirectAttributes ra, HttpSession session) {
+    public String editForm(
+            @PathVariable Long id,
+            Model model,
+            RedirectAttributes ra,
+            HttpSession session
+    ) {
         if (!isLoggedIn(session)) return "redirect:/login";
 
         try {
-            model.addAttribute("province", service.findById(id));
+            Province province = service.findById(id);
+            model.addAttribute("province", province);
             model.addAttribute("mode", "edit");
+
             return appLocation + "/Province/province-form";
         } catch (Exception e) {
             ra.addFlashAttribute("error", "Province not found");
@@ -161,10 +175,13 @@ public class ProvinceController extends GenerateController {
             return "redirect:/provinces/" + id + "/edit";
         }
 
-        if (province.getStatus() == null) province.setStatus(existing.getStatus());
+        if (province.getStatus() == null) {
+            province.setStatus(existing.getStatus());
+        }
 
         service.update(id, province);
         ra.addFlashAttribute("success", "Province updated successfully");
+
         return "redirect:/provinces";
     }
 }

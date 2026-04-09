@@ -7,7 +7,11 @@ import jakarta.servlet.http.HttpSession;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.time.LocalDate;
@@ -40,18 +44,12 @@ public class CountryController extends GenerateController {
             @RequestParam(name = "search", defaultValue = "") String search,
             HttpSession session
     ) {
-        if (!isLoggedIn(session)) {
-            showLogger(
-                "COUNTRY",
-                "Access denied to list page because user is not logged in.",
-                "warn"
-            );
-            return "redirect:/login";
-        }
+        if (!isLoggedIn(session)) return "redirect:/login";
 
         int pageSize = (size == null || size <= 0) ? defaultPageSize : size;
         long totalElements = service.countAll(search);
         int totalPages = (int) Math.ceil(totalElements / (double) pageSize);
+
         if (totalPages <= 0) totalPages = 1;
         if (page < 0) page = 0;
         if (page > totalPages - 1) page = totalPages - 1;
@@ -71,20 +69,14 @@ public class CountryController extends GenerateController {
 
     @GetMapping("/countries/new")
     public String newForm(Model model, HttpSession session) {
-        if (!isLoggedIn(session)) {
-            showLogger(
-                "COUNTRY",
-                "Access denied to list page because user is not logged in.",
-                "warn"
-            );
-            return "redirect:/login";
-        }
+        if (!isLoggedIn(session)) return "redirect:/login";
 
         Country country = new Country();
         country.setStatus(1);
 
         model.addAttribute("country", country);
         model.addAttribute("mode", "new");
+
         return appLocation + "/Country/country-form";
     }
 
@@ -94,14 +86,7 @@ public class CountryController extends GenerateController {
             RedirectAttributes ra,
             HttpSession session
     ) {
-        if (!isLoggedIn(session)) {
-            showLogger(
-                "COUNTRY",
-                "Access denied to list page because user is not logged in.",
-                "warn"
-            );
-            return "redirect:/login";
-        }
+        if (!isLoggedIn(session)) return "redirect:/login";
 
         country.setCode(emptyToNull(country.getCode()));
         country.setName(emptyToNull(country.getName()));
@@ -125,23 +110,24 @@ public class CountryController extends GenerateController {
 
         service.save(country);
         ra.addFlashAttribute("success", "Country saved successfully");
+
         return "redirect:/countries";
     }
 
     @GetMapping("/countries/{id}/edit")
-    public String editForm(@PathVariable Long id, Model model, RedirectAttributes ra, HttpSession session) {
-        if (!isLoggedIn(session)) {
-            showLogger(
-                "COUNTRY",
-                "Access denied to list page because user is not logged in.",
-                "warn"
-            );
-            return "redirect:/login";
-        }
+    public String editForm(
+            @PathVariable Long id,
+            Model model,
+            RedirectAttributes ra,
+            HttpSession session
+    ) {
+        if (!isLoggedIn(session)) return "redirect:/login";
 
         try {
-            model.addAttribute("country", service.findById(id));
+            Country country = service.findById(id);
+            model.addAttribute("country", country);
             model.addAttribute("mode", "edit");
+
             return appLocation + "/Country/country-form";
         } catch (Exception e) {
             ra.addFlashAttribute("error", "Country not found");
@@ -156,14 +142,7 @@ public class CountryController extends GenerateController {
             RedirectAttributes ra,
             HttpSession session
     ) {
-        if (!isLoggedIn(session)) {
-            showLogger(
-                "COUNTRY",
-                "Access denied to list page because user is not logged in.",
-                "warn"
-            );
-            return "redirect:/login";
-        }
+        if (!isLoggedIn(session)) return "redirect:/login";
 
         Country existing = service.findById(id);
 
@@ -184,10 +163,13 @@ public class CountryController extends GenerateController {
             return "redirect:/countries/" + id + "/edit";
         }
 
-        if (country.getStatus() == null) country.setStatus(existing.getStatus());
+        if (country.getStatus() == null) {
+            country.setStatus(existing.getStatus());
+        }
 
         service.update(id, country);
         ra.addFlashAttribute("success", "Country updated successfully");
+
         return "redirect:/countries";
     }
 }

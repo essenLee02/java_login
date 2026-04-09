@@ -5,7 +5,6 @@ public class Province {
     private Long id;
     private String idProvince;
     private String idCountry;
-    private String countryName;
     private String code;
     private String name;
     private Integer status;
@@ -15,6 +14,11 @@ public class Province {
     private String updatedBy;
     private String deletedDate;
     private String deletedBy;
+
+    // tambahan untuk display contry table
+    private String countryId;
+    private String countryCode;
+    private String countryName;
 
     public Long getId() {
         return id;
@@ -38,14 +42,6 @@ public class Province {
 
     public void setIdCountry(String idCountry) {
         this.idCountry = idCountry;
-    }
-
-    public String getCountryName() {
-        return countryName;
-    }
-
-    public void setCountryName(String countryName) {
-        this.countryName = countryName;
     }
 
     public String getCode() {
@@ -119,4 +115,30 @@ public class Province {
     public void setDeletedBy(String deletedBy) {
         this.deletedBy = deletedBy;
     }
+
+    // Country Display Start
+    public String getCountryId() {
+        return countryId;
+    }
+
+    public void setCountryId(String countryId) {
+        this.countryId = countryId;
+    }
+
+    public String getCountryCode() {
+        return countryCode;
+    }
+
+    public void setCountryCode(String countryCode) {
+        this.countryCode = countryCode;
+    }
+
+    public String getCountryName() {
+        return countryName;
+    }
+
+    public void setCountryName(String countryName) {
+        this.countryName = countryName;
+    }
+    // Country Display End
 }
