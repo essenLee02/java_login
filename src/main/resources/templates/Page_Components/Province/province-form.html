@@ -1,90 +1,279 @@
 <!DOCTYPE html>
 <html lang="en" xmlns:th="http://www.thymeleaf.org">
-<head th:replace="~{fragments/layout :: head(mode == 'edit' ? 'Edit Province' : 'New Province')}"></head>
-<body>
-<div class="wrapper">
-    <div th:replace="~{fragments/layout :: sidebar}"></div>
+    <head th:replace="~{fragments/layout :: head(mode == 'edit' ? 'Edit Province' : 'New Province')}"></head>
+    <body>
+        <div class="wrapper">
+            <div th:replace="~{fragments/layout :: sidebar}"></div>
 
-    <div class="main">
-        <main class="content">
-            <div class="container-fluid p-0" style="max-width: 900px;">
-                <div class="d-flex justify-content-between align-items-center mb-3">
-                    <h3 th:text="${mode == 'edit' ? 'Edit Province' : 'New Province'}">Province</h3>
-                    <a class="btn btn-outline-secondary" th:href="@{/provinces}">Back</a>
-                </div>
+            <div class="main">
+                <main class="content">
+                    <div class="container-fluid p-0" style="max-width: 950px;">
+                        <div class="d-flex justify-content-between align-items-center mb-3">
+                            <h3 th:text="${mode == 'edit' ? 'Edit Province' : 'New Province'}">Province</h3>
+                            <a class="btn btn-outline-secondary" th:href="@{/provinces}">Back</a>
+                        </div>
 
-                <div th:if="${error}" class="alert alert-danger" th:text="${error}"></div>
-                <div th:if="${success}" class="alert alert-success" th:text="${success}"></div>
+                        <div th:if="${error}" class="alert alert-danger" th:text="${error}"></div>
+                        <div th:if="${success}" class="alert alert-success" th:text="${success}"></div>
 
-                <div class="card">
-                    <div class="card-body">
-                        <form method="post"
-                              th:action="${mode == 'edit'} ? @{/provinces/{id}(id=${province.id})} : @{/provinces}"
-                              class="row g-3">
+                        <div class="card">
+                            <div class="card-body">
+                                <form method="post"
+                                    th:action="${mode == 'edit'} ? @{/provinces/{id}(id=${province.id})} : @{/provinces}"
+                                    class="row g-3">
 
-                            <div class="col-md-6">
-                                <label class="form-label">ID Province</label>
-                                <input type="text"
-                                       class="form-control"
-                                       th:value="${mode == 'edit' ? province.idProvince : 'AUTO GENERATED'}"
-                                       readonly>
+                                    <div class="col-md-6">
+                                        <label class="form-label">ID Province</label>
+                                        <input type="text"
+                                            class="form-control"
+                                            th:value="${mode == 'edit' ? province.idProvince : 'AUTO GENERATED'}"
+                                            readonly>
+                                    </div>
+
+                                    <div class="col-md-6">
+                                        <label class="form-label">Country</label>
+                                        <input type="hidden" name="idCountry" id="idCountry" th:value="${province.idCountry}">
+                                        <div class="input-group">
+                                            <input type="text"
+                                                id="countryDisplay"
+                                                class="form-control"
+                                                th:value="${province.countryName}"
+                                                placeholder="Choose Country..."
+                                                readonly
+                                                required>
+                                            <button type="button" class="btn btn-outline-primary" id="btnOpenCountryModal">
+                                                Search
+                                            </button>
+                                        </div>
+                                        <div class="form-text">Pilih country melalui popup.</div>
+                                    </div>
+
+                                    <div class="col-md-6">
+                                        <label class="form-label">Code</label>
+                                        <input type="text"
+                                            name="code"
+                                            class="form-control"
+                                            th:value="${province.code}">
+                                    </div>
+
+                                    <div class="col-md-6">
+                                        <label class="form-label">Name</label>
+                                        <input type="text"
+                                            name="name"
+                                            class="form-control"
+                                            th:value="${province.name}"
+                                            required>
+                                    </div>
+
+                                    <div class="col-md-6">
+                                        <label class="form-label">Status</label>
+                                        <select name="status" class="form-select">
+                                            <option value="1" th:selected="${province.status == 1}">Active</option>
+                                            <option value="0" th:selected="${province.status == 0}">Inactive</option>
+                                        </select>
+                                    </div>
+
+                                    <div class="col-12 d-flex gap-2">
+                                        <button type="submit"
+                                                class="btn btn-primary"
+                                                th:text="${mode == 'edit' ? 'Save Changes' : 'Create Province'}">
+                                            Save
+                                        </button>
+                                        <a class="btn btn-outline-secondary" th:href="@{/provinces}">Cancel</a>
+                                    </div>
+                                </form>
                             </div>
+                        </div>
+                    </div>
+                </main>
+            </div>
+        </div>
 
-                            <div class="col-md-6">
-                                <label class="form-label">Country</label>
-                                <select name="idCountry" class="form-select" required>
-                                    <option value="">Select Country</option>
-                                    <option th:each="c : ${countries}"
-                                            th:value="${c.idCountry}"
-                                            th:text="${c.name}"
-                                            th:selected="${c.idCountry == province.idCountry}">
-                                    </option>
-                                </select>
+        <!-- Modal Start -->
+        <div class="modal fade" id="countryModal" tabindex="-1" aria-labelledby="countryModalLabel" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-scrollable modal-lg">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title">Select Country</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="row g-2 mb-3">
+                            <div class="col-md-8">
+                                <input type="text" id="countrySearchKeyword" class="form-control" placeholder="Search code or name">
                             </div>
+                            <div class="col-md-4">
+                                <button type="button" class="btn btn-primary w-100" id="btnSearchCountry">Search</button>
+                            </div>
+                        </div>
 
-                            <div class="col-md-6">
-                                <label class="form-label">Code</label>
-                                <input type="text"
-                                       name="code"
-                                       class="form-control"
-                                       th:value="${province.code}">
-                            </div>
+                        <div class="table-responsive">
+                            <table class="table table-sm table-striped align-middle">
+                                <thead>
+                                <tr>
+                                    <th>Code</th>
+                                    <th>Name</th>
+                                    <th style="width: 120px;">Action</th>
+                                </tr>
+                                </thead>
+                                <tbody id="countryModalTableBody">
+                                <tr>
+                                    <td colspan="3" class="text-center text-muted">No data</td>
+                                </tr>
+                                </tbody>
+                            </table>
+                        </div>
 
-                            <div class="col-md-6">
-                                <label class="form-label">Name</label>
-                                <input type="text"
-                                       name="name"
-                                       class="form-control"
-                                       th:value="${province.name}"
-                                       required>
-                            </div>
-
-                            <div class="col-md-6">
-                                <label class="form-label">Status</label>
-                                <select name="status" class="form-select">
-                                    <option value="1" th:selected="${province.status == 1}">Active</option>
-                                    <option value="0" th:selected="${province.status == 0}">Inactive</option>
-                                </select>
-                            </div>
-
-                            <div class="col-12 d-flex gap-2">
-                                <button type="submit"
-                                        class="btn btn-primary"
-                                        th:text="${mode == 'edit' ? 'Save Changes' : 'Create Province'}">
-                                    Save
-                                </button>
-                                <a class="btn btn-outline-secondary" th:href="@{/provinces}">Cancel</a>
-                            </div>
-                        </form>
+                        <nav class="mt-3">
+                            <ul class="pagination justify-content-center mb-0" id="countryModalPagination"></ul>
+                        </nav>
                     </div>
                 </div>
             </div>
-        </main>
-    </div>
-</div>
+        </div>
+        <!-- Modal End -->
 
-<div th:replace="~{fragments/layout :: scripts(~{::extraScripts})}">
-    <th:block th:fragment="extraScripts"></th:block>
-</div>
-</body>
+        <div th:replace="~{fragments/layout :: scripts(~{::extraScripts})}">
+            <th:block th:fragment="extraScripts">
+                <script>
+                    document.addEventListener("DOMContentLoaded", function () {
+                        const countryModalEl = document.getElementById("countryModal");
+                        const countryModal = new bootstrap.Modal(countryModalEl);
+
+                        const btnOpenCountryModal = document.getElementById("btnOpenCountryModal");
+                        const btnSearchCountry = document.getElementById("btnSearchCountry");
+                        const countrySearchKeyword = document.getElementById("countrySearchKeyword");
+                        const countryModalTableBody = document.getElementById("countryModalTableBody");
+                        const countryModalPagination = document.getElementById("countryModalPagination");
+                        const idCountry = document.getElementById("idCountry");
+                        const countryDisplay = document.getElementById("countryDisplay");
+
+                        function renderCountryRows(items) {
+                            countryModalTableBody.innerHTML = "";
+
+                            if (!items || items.length === 0) {
+                                countryModalTableBody.innerHTML = `
+                                    <tr>
+                                        <td colspan="3" class="text-center text-muted">No data</td>
+                                    </tr>
+                                `;
+                                return;
+                            }
+
+                            items.forEach(item => {
+                                const tr = document.createElement("tr");
+                                tr.innerHTML = `
+                                    <td>${item.code ?? ""}</td>
+                                    <td>${item.name ?? ""}</td>
+                                    <td>
+                                        <button type="button"
+                                                class="btn btn-sm btn-primary btn-choose-country"
+                                                data-id="${item.idCountry ?? ""}"
+                                                data-name="${item.name ?? ""}">
+                                            Choose
+                                        </button>
+                                    </td>
+                                `;
+                                countryModalTableBody.appendChild(tr);
+                            });
+
+                            document.querySelectorAll(".btn-choose-country").forEach(btn => {
+                                btn.addEventListener("click", function () {
+                                    idCountry.value = this.dataset.id;
+                                    countryDisplay.value = this.dataset.name;
+                                    countryModal.hide();
+                                });
+                            });
+                        }
+
+                        function renderCountryPagination(data, keyword) {
+                            countryModalPagination.innerHTML = "";
+
+                            if (!data || data.totalPages <= 1) {
+                                return;
+                            }
+
+                            const createItem = (label, page, disabled, active) => {
+                                const li = document.createElement("li");
+                                li.className = "page-item" + (disabled ? " disabled" : "") + (active ? " active" : "");
+
+                                const a = document.createElement("a");
+                                a.className = "page-link";
+                                a.href = "#";
+                                a.textContent = label;
+
+                                if (!disabled) {
+                                    a.addEventListener("click", function (e) {
+                                        e.preventDefault();
+                                        loadCountries(keyword, page);
+                                    });
+                                }
+
+                                li.appendChild(a);
+                                return li;
+                            };
+
+                            countryModalPagination.appendChild(
+                                createItem("«", data.currentPage - 1, !data.hasPrev, false)
+                            );
+
+                            for (let i = 0; i < data.totalPages; i++) {
+                                countryModalPagination.appendChild(
+                                    createItem(String(i + 1), i, false, i === data.currentPage)
+                                );
+                            }
+
+                            countryModalPagination.appendChild(
+                                createItem("»", data.currentPage + 1, !data.hasNext, false)
+                            );
+                        }
+
+                        async function loadCountries(keyword = "", page = 0) {
+                            const url = `/api/provinces/countries/search?search=${encodeURIComponent(keyword)}&page=${page}&size=5`;
+
+                            try {
+                                const response = await fetch(url, {
+                                    headers: {
+                                        "X-Requested-With": "XMLHttpRequest"
+                                    }
+                                });
+
+                                if (!response.ok) {
+                                    throw new Error("Failed to load country data");
+                                }
+
+                                const data = await response.json();
+                                renderCountryRows(data.content);
+                                renderCountryPagination(data, keyword);
+                            } catch (err) {
+                                countryModalTableBody.innerHTML = `
+                                    <tr>
+                                        <td colspan="3" class="text-center text-danger">Failed to load data</td>
+                                    </tr>
+                                `;
+                                countryModalPagination.innerHTML = "";
+                            }
+                        }
+
+                        btnOpenCountryModal.addEventListener("click", function () {
+                            countrySearchKeyword.value = "";
+                            loadCountries("", 0);
+                            countryModal.show();
+                        });
+
+                        btnSearchCountry.addEventListener("click", function () {
+                            loadCountries(countrySearchKeyword.value, 0);
+                        });
+
+                        countrySearchKeyword.addEventListener("keydown", function (e) {
+                            if (e.key === "Enter") {
+                                e.preventDefault();
+                                loadCountries(countrySearchKeyword.value, 0);
+                            }
+                        });
+                    });
+                </script>
+            </th:block>
+        </div>
+    </body>
 </html>

@@ -7,6 +7,7 @@ import com.example.auth.service.ProvinceService;
 import com.example.auth.util.GenerateController;
 import jakarta.servlet.http.HttpSession;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -14,10 +15,13 @@ import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.time.LocalDate;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.IntStream;
 
 @Controller
@@ -309,4 +313,51 @@ public class ProvinceController extends GenerateController {
 
         return "redirect:/provinces";
     }
+
+    @GetMapping("/api/provinces/countries/search")
+    @ResponseBody
+    public ResponseEntity<?> searchCountriesForModal(
+            @RequestParam(name = "search", defaultValue = "") String search,
+            @RequestParam(name = "page", defaultValue = "0") int page,
+            @RequestParam(name = "size", defaultValue = "5") int size,
+            HttpSession session
+    ) {
+        if (!isLoggedIn(session)) {
+            return ResponseEntity.status(401).body("Unauthorized");
+        }
+
+        if (page < 0) {
+            page = 0;
+        }
+
+        if (size <= 0) {
+            size = 5;
+        }
+
+        String searchValue = emptyToEmpty(search);
+        long totalElements = countryService.countAll(searchValue);
+        int totalPages = (int) Math.ceil(totalElements / (double) size);
+
+        if (totalPages <= 0) {
+            totalPages = 1;
+        }
+
+        if (page > totalPages - 1) {
+            page = totalPages - 1;
+        }
+
+        List<Country> data = countryService.getPage(searchValue, page, size);
+
+        Map<String, Object> result = new HashMap<>();
+        result.put("content", data);
+        result.put("currentPage", page);
+        result.put("pageSize", size);
+        result.put("totalElements", totalElements);
+        result.put("totalPages", totalPages);
+        result.put("hasPrev", page > 0);
+        result.put("hasNext", page < totalPages - 1);
+
+        return ResponseEntity.ok(result);
+    }
+    // End ProvinceController
 }
