@@ -1,0 +1,112 @@
+<!doctype html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+    <!-- Head fragment: call with th:replace="~{fragments/layout :: head('Page Title')}" -->
+    <head th:fragment="head(title)">
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1" />
+
+        <!-- ✅ Elvis operator yang benar -->
+        <title th:text="${title} ?: 'Auth Demo'">Auth Demo</title>
+
+        <!-- Bootstrap 5 CSS -->
+        <link rel="stylesheet" th:href="@{/bootstrap-5.3.8/css/bootstrap.css}" />
+        <link rel="stylesheet" th:href="@{/bootstrap-5.3.8/css/bootstrap.css.map}" />
+        <link rel="stylesheet" th:href="@{/bootstrap-5.3.8/css/bootstrap.min.css}" />
+        <link rel="stylesheet" th:href="@{/bootstrap-5.3.8/css/bootstrap.min.css.map}" />
+        <link rel="stylesheet" th:href="@{/bootstrap-5.3.8/css/bootstrap.rtl.css}" />
+        <link rel="stylesheet" th:href="@{/bootstrap-5.3.8/css/bootstrap.rtl.css.map}" />
+        <link rel="stylesheet" th:href="@{/bootstrap-5.3.8/css/bootstrap.rtl.min.css}" />
+        <link rel="stylesheet" th:href="@{/bootstrap-5.3.8/css/bootstrap.rtl.min.css.map}" />
+        <link rel="stylesheet" th:href="@{/bootstrap-5.3.8/css/bootstrap-grid.css}" />
+        <link rel="stylesheet" th:href="@{/bootstrap-5.3.8/css/bootstrap-grid.css.map}" />
+        <link rel="stylesheet" th:href="@{/bootstrap-5.3.8/css/bootstrap-grid.min.css}" />
+        <link rel="stylesheet" th:href="@{/bootstrap-5.3.8/css/bootstrap-grid.min.css.map}" />
+        <link rel="stylesheet" th:href="@{/bootstrap-5.3.8/css/bootstrap-grid.rtl.css}" />
+        <link rel="stylesheet" th:href="@{/bootstrap-5.3.8/css/bootstrap-grid.rtl.css.map}" />
+        <link rel="stylesheet" th:href="@{/bootstrap-5.3.8/css/bootstrap-grid.rtl.min.css}" />
+        <link rel="stylesheet" th:href="@{/bootstrap-5.3.8/css/bootstrap-grid.rtl.min.css.map}" />
+        <link rel="stylesheet" th:href="@{/bootstrap-5.3.8/css/bootstrap-reboot.css}" />
+        <link rel="stylesheet" th:href="@{/bootstrap-5.3.8/css/bootstrap-reboot.css.map}" />
+        <link rel="stylesheet" th:href="@{/bootstrap-5.3.8/css/bootstrap-reboot.min.css}" />
+        <link rel="stylesheet" th:href="@{/bootstrap-5.3.8/css/bootstrap-reboot.min.css.map}" />
+        <link rel="stylesheet" th:href="@{/bootstrap-5.3.8/css/bootstrap-reboot.rtl.css}" />
+        <link rel="stylesheet" th:href="@{/bootstrap-5.3.8/css/bootstrap-reboot.rtl.css.map}" />
+        <link rel="stylesheet" th:href="@{/bootstrap-5.3.8/css/bootstrap-reboot.rtl.min.css}" />
+        <link rel="stylesheet" th:href="@{/bootstrap-5.3.8/css/bootstrap-reboot.rtl.min.css.map}" />
+        <link rel="stylesheet" th:href="@{/bootstrap-5.3.8/css/bootstrap-utilities.css}" />
+        <link rel="stylesheet" th:href="@{/bootstrap-5.3.8/css/bootstrap-utilities.css.map}" />
+        <link rel="stylesheet" th:href="@{/bootstrap-5.3.8/css/bootstrap-utilities.min.css}" />
+        <link rel="stylesheet" th:href="@{/bootstrap-5.3.8/css/bootstrap-utilities.rtl.css}" />
+        <link rel="stylesheet" th:href="@{/bootstrap-5.3.8/css/bootstrap-utilities.rtl.css.map}" />
+        <link rel="stylesheet" th:href="@{/bootstrap-5.3.8/css/bootstrap-utilities.rtl.min.css.map}" />
+
+        <!-- Bootstrap 5 JS -->
+        <script th:src="@{/bootstrap-5.3.8/js/bootstrap.bundle.js}"></script>
+        <script th:src="@{/bootstrap-5.3.8/js/bootstrap.bundle.js.map}"></script>
+        <script th:src="@{/bootstrap-5.3.8/js/bootstrap.bundle.min.js}"></script>
+        <script th:src="@{/bootstrap-5.3.8/js/bootstrap.bundle.min.js.map}"></script>
+        <script th:src="@{/bootstrap-5.3.8/js/bootstrap.esm.js}"></script>
+        <script th:src="@{/bootstrap-5.3.8/js/bootstrap.esm.js.map}"></script>
+        <script th:src="@{/bootstrap-5.3.8/js/bootstrap.esm.min.js}"></script>
+        <script th:src="@{/bootstrap-5.3.8/js/bootstrap.esm.min.js.map}"></script>
+        <script th:src="@{/bootstrap-5.3.8/js/bootstrap.js}"></script>
+        <script th:src="@{/bootstrap-5.3.8/js/bootstrap.js.map}"></script>
+        <script th:src="@{/bootstrap-5.3.8/js/bootstrap.min.js}"></script>
+        <script th:src="@{/bootstrap-5.3.8/js/bootstrap.min.js.map}"></script>
+
+        <!-- jQuery 3.7.1 (from src/main/resources/public/js/jQuery_V3.7.1.min.js) -->
+        <script th:src="@{/js/jQuery_V3.7.1.min.js}"></script>
+
+        <!-- ✅ AdminKit CSS (pakai th:href) -->
+        <link rel="stylesheet" th:href="@{/Template/admin_kit_template/static/css/app.css}" />
+
+        <!-- Admin Kit Template Start -->
+        <link rel="stylesheet" th:href="@{/Template/admin_kit_template/static/css/app.css}" />
+        <link rel="stylesheet" th:href="@{/Template/admin_kit_template/static/css/app.css.map}" />
+        <script th:src="@{/Template/admin_kit_template/static/js/app.js}"></script>
+        <script th:src="@{/Template/admin_kit_template/static/js/app.js.map}"></script>
+        <!-- Admin Kit Template End -->
+
+        <!-- Toast Template Start -->
+        <link rel="stylesheet" th:href="@{/Template/toast/toastr.min.css}" />
+        <!-- Toast Template End -->
+
+        <!-- Icon Font Stylesheet Start -->
+        <link rel="stylesheet" th:href="@{/Template/font_awesome_6_6_0/css/all.min.css}" />
+        <!-- Icon Font Stylesheet End -->
+    </head>
+
+    <body>
+        <!-- Sidebar fragment Start -->
+        <th:block th:fragment="sidebar">
+            <div th:replace="~{fragments/navbar_left :: navbar_left}"></div>
+        </th:block>
+        <!-- Sidebar fragment End -->
+        
+        <!-- Navbar Header Fragment Start -->
+        <th:block th:fragment="sidebar_header">
+            <div th:replace="~{fragments/navbar_header :: navbar_header}"></div>
+        </th:block>
+        <!-- Navbar Header Fragment End -->
+        
+        <!-- Main Content Fragment Start : call with th:replace="~{fragments/layout :: content('METHOD')}" -->
+        <main th:fragment="content(method)" th:attr="data-method=${method}"></main>
+        <!-- Main Content Fragment End -->      
+
+        <!-- Scripts fragment (place at end of each page) -->
+        <!--
+            NOTE: Previously this file contained a non-Thymeleaf "{% comment %}" block
+            that still got parsed by Thymeleaf and unintentionally created a duplicate
+            fragment named "scripts" without parameters. That caused errors when pages
+            called scripts(~{::extraScripts}).
+        -->
+        <div th:fragment="scripts(extraScripts)">
+            <script th:src="@{/js/jQuery_V3.7.1.min.js}"></script>
+            <script th:src="@{/bootstrap-5.3.8/js/bootstrap.bundle.min.js}"></script>
+            <script th:src="@{/Template/admin_kit_template/static/js/app.js}"></script>
+            <script th:src="@{/Template/admin_kit_template/static/js/app.map}"></script>
+            <!-- slot tambahan script per-page -->
+            <th:block th:replace="${extraScripts} ?: ~{}"></th:block>
+        </div>
+    </body>
+</html>

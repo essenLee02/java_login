@@ -133,147 +133,164 @@
         </div>
         <!-- Modal End -->
 
+        <!-- Scripts Start -->
         <div th:replace="~{fragments/layout :: scripts(~{::extraScripts})}">
             <th:block th:fragment="extraScripts">
+
+                <script th:src="@{/Template/toast/toastr.min.js}"></script>
+                <script th:src="@{/Function_Path/function_form.js}"></script>
+                <script th:src="@{/Function_Path/function_work.js}"></script>
+
                 <script>
-                    document.addEventListener("DOMContentLoaded", function () {
-                        const countryModalEl = document.getElementById("countryModal");
-                        const countryModal = new bootstrap.Modal(countryModalEl);
+                    $(document).ready(function () {
 
-                        const btnOpenCountryModal = document.getElementById("btnOpenCountryModal");
-                        const btnSearchCountry = document.getElementById("btnSearchCountry");
-                        const countrySearchKeyword = document.getElementById("countrySearchKeyword");
-                        const countryModalTableBody = document.getElementById("countryModalTableBody");
-                        const countryModalPagination = document.getElementById("countryModalPagination");
-                        const idCountry = document.getElementById("idCountry");
-                        const countryDisplay = document.getElementById("countryDisplay");
+                        var countryModal = new bootstrap.Modal(document.getElementById('countryModal'), {
+                            backdrop: 'static',
+                            keyboard: true
+                        });
 
-                        function renderCountryRows(items) {
-                            countryModalTableBody.innerHTML = "";
+                        // buka modal
+                        $('#btnOpenCountryModal').on('click', function (e) {
+                            e.preventDefault();
+                            $('#countrySearchKeyword').val('');
+                            loadCountry('', 0);
+                            countryModal.show();
+                        });
 
-                            if (!items || items.length === 0) {
-                                countryModalTableBody.innerHTML = `
-                                    <tr>
-                                        <td colspan="3" class="text-center text-muted">No data</td>
-                                    </tr>
-                                `;
-                                return;
+                        // search button
+                        $('#btnSearchCountry').on('click', function (e) {
+                            e.preventDefault();
+                            loadCountry($('#countrySearchKeyword').val(), 0);
+                        });
+
+                        // enter key pada search
+                        $('#countrySearchKeyword').on('keydown', function (e) {
+                            if (e.key === 'Enter' || e.keyCode === 13) {
+                                e.preventDefault();
+                                loadCountry($('#countrySearchKeyword').val(), 0);
                             }
+                        });
 
-                            items.forEach(item => {
-                                const tr = document.createElement("tr");
-                                tr.innerHTML = `
-                                    <td>${item.code ?? ""}</td>
-                                    <td>${item.name ?? ""}</td>
-                                    <td>
-                                        <button type="button"
-                                                class="btn btn-sm btn-primary btn-choose-country"
-                                                data-id="${item.idCountry ?? ""}"
-                                                data-name="${item.name ?? ""}">
-                                            Choose
-                                        </button>
-                                    </td>
-                                `;
-                                countryModalTableBody.appendChild(tr);
-                            });
+                        function loadCountry(keyword, page) {
+                            var urlHit = '/api/provinces/countries/search';
+                            var methodHit = 'GET';
+                            var headerHit = {};
+                            var dataHit = {
+                                search: keyword,
+                                page: page,
+                                size: 5
+                            };
 
-                            document.querySelectorAll(".btn-choose-country").forEach(btn => {
-                                btn.addEventListener("click", function () {
-                                    idCountry.value = this.dataset.id;
-                                    countryDisplay.value = this.dataset.name;
-                                    countryModal.hide();
-                                });
+                            ajaxHit(urlHit, methodHit, headerHit, dataHit, function (response) {
+                                renderCountryRows(response.content);
+                                renderCountryPagination(response, keyword);
+                            }, function (xhr) {
+                                console.log('Error:', xhr.responseText);
+                                $('#countryModalTableBody').html(`
+                                    <tr>
+                                        <td colspan="3" class="text-center text-danger">Failed to load data</td>
+                                    </tr>
+                                `);
+                                $('#countryModalPagination').empty();
                             });
                         }
 
+                        function renderCountryRows(data) {
+                            $('#countryModalTableBody').empty();
+
+                            if (!data || data.length === 0) {
+                                $('#countryModalTableBody').html(`
+                                    <tr>
+                                        <td colspan="3" class="text-center text-muted">No data</td>
+                                    </tr>
+                                `);
+                                return;
+                            }
+
+                            let rows = '';
+                            $.each(data, function (index, item) {
+                                rows += `
+                                    <tr>
+                                        <td>${item.code != null ? item.code : ''}</td>
+                                        <td>${item.name != null ? item.name : ''}</td>
+                                        <td>
+                                            <button type="button"
+                                                    class="btn btn-sm btn-success btnChooseCountry"
+                                                    data-id="${item.idCountry != null ? item.idCountry : ''}"
+                                                    data-name="${item.name != null ? item.name : ''}">
+                                                Choose
+                                            </button>
+                                        </td>
+                                    </tr>
+                                `;
+                            });
+
+                            $('#countryModalTableBody').html(rows);
+                        }
+
+                        $(document).on('click', '.btnChooseCountry', function (e) {
+                            e.preventDefault();
+
+                            var countryId = $(this).data('id');
+                            var countryName = $(this).data('name');
+
+                            $('#idCountry').val(countryId);
+                            $('#countryDisplay').val(countryName);
+
+                            countryModal.hide();
+                        });
+
                         function renderCountryPagination(data, keyword) {
-                            countryModalPagination.innerHTML = "";
+                            $('#countryModalPagination').empty();
 
                             if (!data || data.totalPages <= 1) {
                                 return;
                             }
 
-                            const createItem = (label, page, disabled, active) => {
-                                const li = document.createElement("li");
-                                li.className = "page-item" + (disabled ? " disabled" : "") + (active ? " active" : "");
+                            let pagination = '';
 
-                                const a = document.createElement("a");
-                                a.className = "page-link";
-                                a.href = "#";
-                                a.textContent = label;
-
-                                if (!disabled) {
-                                    a.addEventListener("click", function (e) {
-                                        e.preventDefault();
-                                        loadCountries(keyword, page);
-                                    });
-                                }
-
-                                li.appendChild(a);
-                                return li;
-                            };
-
-                            countryModalPagination.appendChild(
-                                createItem("«", data.currentPage - 1, !data.hasPrev, false)
-                            );
+                            pagination += `
+                                <li class="page-item ${data.hasPrev ? '' : 'disabled'}">
+                                    <a class="page-link modal-page-link" href="#" data-page="${data.currentPage - 1}" data-keyword="${keyword}">&laquo;</a>
+                                </li>
+                            `;
 
                             for (let i = 0; i < data.totalPages; i++) {
-                                countryModalPagination.appendChild(
-                                    createItem(String(i + 1), i, false, i === data.currentPage)
-                                );
-                            }
-
-                            countryModalPagination.appendChild(
-                                createItem("»", data.currentPage + 1, !data.hasNext, false)
-                            );
-                        }
-
-                        async function loadCountries(keyword = "", page = 0) {
-                            const url = `/api/provinces/countries/search?search=${encodeURIComponent(keyword)}&page=${page}&size=5`;
-
-                            try {
-                                const response = await fetch(url, {
-                                    headers: {
-                                        "X-Requested-With": "XMLHttpRequest"
-                                    }
-                                });
-
-                                if (!response.ok) {
-                                    throw new Error("Failed to load country data");
-                                }
-
-                                const data = await response.json();
-                                renderCountryRows(data.content);
-                                renderCountryPagination(data, keyword);
-                            } catch (err) {
-                                countryModalTableBody.innerHTML = `
-                                    <tr>
-                                        <td colspan="3" class="text-center text-danger">Failed to load data</td>
-                                    </tr>
+                                pagination += `
+                                    <li class="page-item ${i === data.currentPage ? 'active' : ''}">
+                                        <a class="page-link modal-page-link" href="#" data-page="${i}" data-keyword="${keyword}">
+                                            ${i + 1}
+                                        </a>
+                                    </li>
                                 `;
-                                countryModalPagination.innerHTML = "";
                             }
+
+                            pagination += `
+                                <li class="page-item ${data.hasNext ? '' : 'disabled'}">
+                                    <a class="page-link modal-page-link" href="#" data-page="${data.currentPage + 1}" data-keyword="${keyword}">&raquo;</a>
+                                </li>
+                            `;
+
+                            $('#countryModalPagination').html(pagination);
                         }
 
-                        btnOpenCountryModal.addEventListener("click", function () {
-                            countrySearchKeyword.value = "";
-                            loadCountries("", 0);
-                            countryModal.show();
-                        });
+                        $(document).on('click', '.modal-page-link', function (e) {
+                            e.preventDefault();
 
-                        btnSearchCountry.addEventListener("click", function () {
-                            loadCountries(countrySearchKeyword.value, 0);
-                        });
-
-                        countrySearchKeyword.addEventListener("keydown", function (e) {
-                            if (e.key === "Enter") {
-                                e.preventDefault();
-                                loadCountries(countrySearchKeyword.value, 0);
+                            if ($(this).parent().hasClass('disabled')) {
+                                return;
                             }
+
+                            var page = $(this).data('page');
+                            var keyword = $(this).data('keyword');
+
+                            loadCountry(keyword, page);
                         });
+
                     });
                 </script>
             </th:block>
         </div>
+        <!-- Scripts End -->
     </body>
 </html>
