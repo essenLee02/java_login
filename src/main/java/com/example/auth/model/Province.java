@@ -20,6 +20,10 @@ public class Province {
     private String countryCode;
     private String countryName;
 
+    // tambahan untuk display user table
+    private String createdByName;
+    private String updatedByName;
+
     public Long getId() {
         return id;
     }
@@ -141,4 +145,22 @@ public class Province {
         this.countryName = countryName;
     }
     // Country Display End
+
+    // User Display Start
+    public String getCreatedByName() {
+        return createdByName;
+    }
+
+    public void setCreatedByName(String createdByName) {
+        this.createdByName = createdByName;
+    }
+
+    public String getUpdatedByName() {
+        return updatedByName;
+    }
+
+    public void setUpdatedByName(String updatedByName) {
+        this.updatedByName = updatedByName;
+    }
+    // User Display End
 }

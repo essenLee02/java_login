@@ -1,11 +1,12 @@
 package com.example.auth.repository;
 
-import com.example.auth.model.Province;
+import java.util.List;
+
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Repository;
 
-import java.util.List;
+import com.example.auth.model.Province;
 
 @Repository
 public class ProvinceRepository {
@@ -31,14 +32,26 @@ public class ProvinceRepository {
         p.setUpdatedBy(rs.getString("updated_by"));
         p.setDeletedDate(rs.getString("deleted_date"));
         p.setDeletedBy(rs.getString("deleted_by"));
+        p.setCreatedByName(rs.getString("created_by_name"));
+        p.setUpdatedByName(rs.getString("updated_by_name"));
         return p;
     };
 
     public List<Province> findAll() {
         String sql = """
-            SELECT p.*, c.name AS country_name
-            FROM provinces p
-            LEFT JOIN countries c ON c.id_country = p.id_country
+            SELECT
+                p.*
+                , c.name AS country_name
+                , uc.name AS created_by_name
+                , uu.name AS updated_by_name
+            FROM
+                provinces p
+            LEFT JOIN countries c ON
+                c.id_country = p.id_country
+            LEFT JOIN users uc ON
+                p.created_by = uc.id
+            LEFT JOIN users uu ON
+                p.updated_by = uu.id
             ORDER BY p.name ASC
         """;
         return jdbcTemplate.query(sql, rowMapper);
@@ -54,10 +67,20 @@ public class ProvinceRepository {
                 , c.id_country AS country_id
                 , c.code AS country_code
                 , c.name AS country_name
-            FROM provinces p
-            LEFT JOIN countries c ON c.id_country = p.id_country
+                , uc.name AS created_by_name
+                , uu.name AS updated_by_name
+            FROM
+                provinces p
+            LEFT JOIN countries c ON
+                c.id_country = p.id_country
+            LEFT JOIN users uc ON
+                p.created_by = uc.id
+            LEFT JOIN users uu ON
+                p.updated_by = uu.id
             WHERE (? = '' OR IFNULL(p.code, '') LIKE ? OR p.name LIKE ? OR IFNULL(c.name, '') LIKE ?)
-            ORDER BY p.name ASC
+            ORDER BY
+                p.name ASC
+                , uc.name
             LIMIT ? OFFSET ?
         """;
 
@@ -79,9 +102,19 @@ public class ProvinceRepository {
 
     public Province findById(Long id) {
         String sql = """
-            SELECT p.*, c.name AS country_name
-            FROM provinces p
-            LEFT JOIN countries c ON c.id_country = p.id_country
+            SELECT
+                p.*
+                , c.name AS country_name
+                , uc.name AS created_by_name
+                , uu.name AS updated_by_name
+            FROM
+                provinces p
+            LEFT JOIN countries c ON
+                c.id_country = p.id_country
+            LEFT JOIN users uc ON
+                p.created_by = uc.id
+            LEFT JOIN users uu ON
+                p.updated_by = uu.id
             WHERE p.id = ?
         """;
         return jdbcTemplate.queryForObject(sql, rowMapper, id);

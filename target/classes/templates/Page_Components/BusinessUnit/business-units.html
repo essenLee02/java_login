@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+    <head th:replace="~{fragments/layout :: head('Business Unit Master')}"></head>
+
+    <body>
+        <div class="wrapper">
+            <!-- Sidebar dari layout Start -->
+            <div th:replace="~{fragments/layout :: sidebar}"></div>
+            <!-- Sidebar dari layout End -->
+
+            <div class="main">
+                <!-- Navbar Header dari layout Start -->
+                <div th:replace="~{fragments/layout :: sidebar_header}"></div>
+                <!-- Navbar Header dari layout End -->
+
+                <main class="content">
+                    <div class="container-fluid p-0">
+                        <div class="d-flex justify-content-between align-items-center mb-3">
+                            <div>
+                                <h3 class="mb-0">Business Unit Master</h3>
+                                <div class="text-muted">Manage Business Unit data</div>
+                            </div>
+                            <a class="btn btn-primary" th:href="@{/business-units/new}">+ New Business Unit</a>
+                        </div>
+
+                        <div th:if="${success}" class="alert alert-success" th:text="${success}"></div>
+                        <div th:if="${error}" class="alert alert-danger" th:text="${error}"></div>
+
+                        <div class="card">
+                            <div class="card-header">
+                                <div class="input-group">
+                                    <input type="text"
+                                        class="form-control form-control-lg"
+                                        placeholder="Search by code, name, country, province, city, email, phone..."
+                                        id="search"
+                                        name="search"
+                                        th:value="${search}">
+                                    <button class="btn btn-info text-light" type="button" id="btnSearch">Search</button>
+                                    <button class="btn btn-outline-secondary" type="button" id="btnResetSearch">Reset</button>
+                                </div>
+                            </div>
+
+                            <div class="card-body">
+                                <div id="printTable"></div>
+
+                                <!-- Pagination Start -->
+                                <div id="pagination" class="mt-3">
+                                    <nav aria-label="Business Unit pagination">
+                                        <ul class="pagination justify-content-center mb-0">
+                                            <!-- Prev -->
+                                            <li class="page-item" th:classappend="${!hasPrev} ? ' disabled'">
+                                                <a class="page-link"
+                                                   th:href="@{/business-units(page=${currentPage - 1}, size=${pageSize}, search=${search})}">
+                                                    &laquo;
+                                                </a>
+                                            </li>
+
+                                            <!-- Page Number -->
+                                            <th:block th:if="${pageNumbers != null and !#lists.isEmpty(pageNumbers)}">
+                                                <li class="page-item"
+                                                    th:each="p : ${pageNumbers}"
+                                                    th:classappend="${p == currentPage} ? ' active'">
+                                                    <a class="page-link"
+                                                       th:href="@{/business-units(page=${p}, size=${pageSize}, search=${search})}"
+                                                       th:text="${p + 1}">
+                                                        1
+                                                    </a>
+                                                </li>
+                                            </th:block>
+
+                                            <!-- Fallback -->
+                                            <th:block th:if="${pageNumbers == null or #lists.isEmpty(pageNumbers)}">
+                                                <li class="page-item active">
+                                                    <a class="page-link"
+                                                       th:href="@{/business-units(page=0, size=${pageSize}, search=${search})}">
+                                                        1
+                                                    </a>
+                                                </li>
+                                            </th:block>
+
+                                            <!-- Next -->
+                                            <li class="page-item" th:classappend="${!hasNext} ? ' disabled'">
+                                                <a class="page-link"
+                                                   th:href="@{/business-units(page=${currentPage + 1}, size=${pageSize}, search=${search})}">
+                                                    &raquo;
+                                                </a>
+                                            </li>
+                                        </ul>
+                                    </nav>
+                                </div>
+                                <!-- Pagination End -->
+                            </div>
+                        </div>
+                    </div>
+                </main>
+            </div>
+        </div>
+
+        <!-- Scripts Start -->
+        <div th:replace="~{fragments/layout :: scripts(~{::extraScripts})}">
+            <th:block th:fragment="extraScripts">
+                <script th:src="@{/Template/toast/toastr.min.js}"></script>
+                <script th:src="@{/Function_Path/function_form.js}"></script>
+                <script th:src="@{/Function_Path/function_work.js}"></script>
+
+                <script th:inline="javascript">
+                    $(document).ready(function () {
+                        const businessUnitData = /*[[${businessUnits}]]*/ [];
+                        const currentPageSize = /*[[${pageSize}]]*/ 10;
+
+                        bussinessMasterList();
+
+                        function bussinessMasterList() {
+                            var headers = [
+                                'BU Code',
+                                'Name',
+                                'Status'
+                            ];
+
+                            var chunks = [
+                                'code',
+                                'name',
+                                'status'
+                            ];
+
+                            var actionUseable = true;
+                            var actionType = [
+                                'update',
+                                'block',
+                                'delete'
+                            ];
+
+                            var actionParameter = ['id'];
+
+                            let cetakTable = tableModal(
+                                headers,
+                                chunks,
+                                businessUnitData,
+                                actionUseable,
+                                actionType,
+                                actionParameter,
+                                null,
+                                []
+                            );
+
+                            $('#printTable').empty().append(cetakTable);
+                        }
+
+                        $('#btnSearch').on('click', function () {
+                            const keyword = $('#search').val() || '';
+                            window.location.href = `/business-units?page=0&size=${currentPageSize}&search=${encodeURIComponent(keyword)}`;
+                        });
+
+                        $('#search').on('keyup', function (e) {
+                            if (e.key === 'Enter') {
+                                const keyword = $('#search').val() || '';
+                                window.location.href = `/business-units?page=0&size=${currentPageSize}&search=${encodeURIComponent(keyword)}`;
+                            }
+                        });
+
+                        $('#btnResetSearch').on('click', function () {
+                            $('#search').val('');
+                            window.location.href = `/business-units?page=0&size=${currentPageSize}&search=`;
+                        });
+
+                        /*
+                         * Handle tombol UPDATE dari tableModal tanpa ubah function_form.js
+                         * Button update berada di dalam #printTable, jadi aman tidak bentrok dengan btnSearch
+                         */
+                        $('#printTable').on('click', 'button.btn-info', function (e) {
+                            e.preventDefault();
+
+                            const $row = $(this).closest('tr');
+                            const rowIndex = $row.index();
+
+                            if (rowIndex < 0 || !businessUnitData[rowIndex]) {
+                                return;
+                            }
+
+                            const selectedId = businessUnitData[rowIndex].id;
+
+                            if (!selectedId) {
+                                return;
+                            }
+
+                            window.location.href = `/business-units/${selectedId}/edit`;
+                        });
+                    });
+                </script>
+            </th:block>
+        </div>
+        <!-- Scripts End -->
+    </body>
+</html>

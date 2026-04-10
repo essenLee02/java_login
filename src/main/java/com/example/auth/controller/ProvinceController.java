@@ -1,11 +1,11 @@
 package com.example.auth.controller;
 
-import com.example.auth.model.Country;
-import com.example.auth.model.Province;
-import com.example.auth.service.CountryService;
-import com.example.auth.service.ProvinceService;
-import com.example.auth.util.GenerateController;
-import jakarta.servlet.http.HttpSession;
+import java.time.LocalDate;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.stream.IntStream;
+
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
@@ -18,11 +18,13 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
-import java.time.LocalDate;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.stream.IntStream;
+import com.example.auth.model.Country;
+import com.example.auth.model.Province;
+import com.example.auth.service.CountryService;
+import com.example.auth.service.ProvinceService;
+import com.example.auth.util.GenerateController;
+
+import jakarta.servlet.http.HttpSession;
 
 @Controller
 public class ProvinceController extends GenerateController {
@@ -150,9 +152,18 @@ public class ProvinceController extends GenerateController {
         String userName = getLoginUserName(session);
 
         try {
-            province.setIdCountry(emptyToNull(province.getIdCountry()));
-            province.setCode(emptyToNull(province.getCode() == null ? null : province.getCode().toUpperCase()));
-            province.setName(emptyToNull(province.getName() == null ? null : province.getName().toUpperCase()));
+            if (province.getCode() == null || province.getCode().trim().isEmpty()) {
+                return "redirect:/register?error=Kode wajib diisi";
+            }
+
+            if (province.getName() == null || province.getName().trim().isEmpty()) {
+                return "redirect:/register?error=Nama wajib diisi";
+            }
+            
+            long totalData = service.countAll("");
+            province.setIdProvince(generateRandomString(3, province.getName(), totalData));
+            province.setCode(province.getCode().toUpperCase());
+            province.setName(province.getName().toUpperCase());
 
             String validation = service.validate(province, null);
             if (validation != null) {
@@ -164,17 +175,16 @@ public class ProvinceController extends GenerateController {
                 return "redirect:/provinces/new";
             }
 
-            long totalData = service.countAll("");
-            province.setIdProvince(generateRandomString(3, province.getName(), totalData));
+            province.setIdCountry(emptyToNull(province.getIdCountry()));
             province.setCreatedDate(LocalDate.now().toString());
             province.setCreatedBy(String.valueOf(session.getAttribute("userId")));
             province.setUpdatedDate(LocalDate.now().toString());
             province.setUpdatedBy(String.valueOf(session.getAttribute("userId")));
-            province.setDeletedDate(null);
-            province.setDeletedBy(null);
+            province.setDeletedDate(LocalDate.now().toString());
+            province.setDeletedBy(String.valueOf(session.getAttribute("userId")));
 
             if (province.getStatus() == null) {
-                province.setStatus(1);
+                province.setStatus(1); // 1 : Active, 2 : Blocked/Inactive, 3 : Deleted
             }
 
             service.save(province);
