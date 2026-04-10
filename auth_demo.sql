@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Waktu pembuatan: 10 Apr 2026 pada 05.52
+-- Waktu pembuatan: 10 Apr 2026 pada 11.39
 -- Versi server: 10.4.32-MariaDB
 -- Versi PHP: 8.1.25
 
@@ -221,7 +221,8 @@ INSERT INTO `provinces` (`id`, `id_province`, `id_country`, `code`, `name`, `sta
 (16, '1L5SY000015', '1U9AR000012', 'PRO.0000.0520.0046', 'SYARQIYAH', 1, '2025-03-21', 'HRULI0000003', '2025-03-21', 'HRULI0000003', '2025-03-21', 'HRULI0000003', '2025-03-20 17:44:47', '2025-03-20 17:44:47'),
 (17, '861MA000016', '1U9AR000012', 'PRO.0000.0520.0047', 'MAKKAH', 1, '2025-03-21', 'HRULI0000003', '2025-03-21', 'HRULI0000003', '2025-03-21', 'HRULI0000003', '2025-03-20 17:45:09', '2025-03-20 17:45:09'),
 (18, '005RI000017', '1U9AR000012', 'PRO.0000.0520.0048', 'RIYADH', 1, '2025-03-21', 'HRULI0000003', '2025-03-21', 'HRULI0000003', '2025-03-21', 'HRULI0000003', '2025-03-20 17:45:30', '2025-03-20 17:45:30'),
-(19, 'P59MA000018', '1U9AR000012', 'PRO.0000.0520.0049', 'MADINAH', 1, '2025-03-21', 'HRULI0000003', '2025-03-21', 'HRULI0000003', '2025-03-21', 'HRULI0000003', '2025-03-20 17:46:00', '2025-03-20 17:46:00');
+(19, 'P59MA000018', '1U9AR000012', 'PRO.0000.0520.0049', 'MADINAH', 1, '2025-03-21', 'HRULI0000003', '2025-03-21', 'HRULI0000003', '2025-03-21', 'HRULI0000003', '2025-03-20 17:46:00', '2025-03-20 17:46:00'),
+(20, 'UKGKE000019', '1DZIN0000001', 'PRO.0000.0001.0009', 'KELANTAN', 1, '2026-04-10', '3', '2026-04-10', '1', '2026-04-10', '3', NULL, NULL);
 
 -- --------------------------------------------------------
 
@@ -243,7 +244,8 @@ CREATE TABLE `users` (
 
 INSERT INTO `users` (`id`, `name`, `email`, `password_hash`, `created_at`) VALUES
 (1, 'Stefanus Nigel', 'dokumen.nigel2@gmail.com', '$2a$12$dq7w4otwC9evDh3A46iRN.EPztrUcnKqAxQMO.0ZIRhVFMWuVjRZa', '2026-01-12 02:36:08'),
-(2, 'Alvin Gohat', 'alvin.vas@gmail.com', '$2a$12$dq7w4otwC9evDh3A46iRN.EPztrUcnKqAxQMO.0ZIRhVFMWuVjRZa', '2026-01-12 07:58:39');
+(2, 'Alvin Gohat', 'alvin.vas@gmail.com', '$2a$12$dq7w4otwC9evDh3A46iRN.EPztrUcnKqAxQMO.0ZIRhVFMWuVjRZa', '2026-01-12 07:58:39'),
+(3, 'Huang Lia', 'lia@gmail.com', '$2a$12$GObLsEkwHXjYHmlF459lOOH.yVI0NXNoruHuqzi6kig.AjOeK05Lu', '2026-04-10 08:35:36');
 
 --
 -- Indexes for dumped tables
@@ -262,6 +264,12 @@ ALTER TABLE `bussiness_units`
 ALTER TABLE `items`
   ADD PRIMARY KEY (`id`),
   ADD UNIQUE KEY `uq_items_code_bu` (`code`,`business_unit`);
+
+--
+-- Indeks untuk tabel `provinces`
+--
+ALTER TABLE `provinces`
+  ADD PRIMARY KEY (`id`);
 
 --
 -- Indeks untuk tabel `users`
@@ -287,10 +295,16 @@ ALTER TABLE `items`
   MODIFY `id` bigint(20) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
 
 --
+-- AUTO_INCREMENT untuk tabel `provinces`
+--
+ALTER TABLE `provinces`
+  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=21;
+
+--
 -- AUTO_INCREMENT untuk tabel `users`
 --
 ALTER TABLE `users`
-  MODIFY `id` bigint(20) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
+  MODIFY `id` bigint(20) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
 COMMIT;
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
