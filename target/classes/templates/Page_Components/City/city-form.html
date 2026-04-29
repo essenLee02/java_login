@@ -1,102 +1,117 @@
 <!DOCTYPE html>
 <html lang="en" xmlns:th="http://www.thymeleaf.org">
-<head th:replace="~{fragments/layout :: head(mode == 'edit' ? 'Edit City' : 'New City')}"></head>
-<body>
-<div class="wrapper">
-    <div th:replace="~{fragments/layout :: sidebar}"></div>
+    <head th:replace="~{fragments/layout :: head(mode == 'edit' ? 'Edit City' : 'New City')}"></head>
+    <body>
+        <div class="wrapper">
+            <div th:replace="~{fragments/layout :: sidebar}"></div>
 
-    <div class="main">
-        <main class="content">
-            <div class="container-fluid p-0" style="max-width: 900px;">
-                <div class="d-flex justify-content-between align-items-center mb-3">
-                    <h3 th:text="${mode == 'edit' ? 'Edit City' : 'New City'}">City</h3>
-                    <a class="btn btn-outline-secondary" th:href="@{/cities}">Back</a>
-                </div>
+            <div class="main">
+                <main class="content">
+                    <div class="container-fluid p-0" style="max-width: 900px;">
+                        <div class="d-flex justify-content-between align-items-center mb-3">
+                            <h3 th:text="${mode == 'edit' ? 'Edit City' : 'New City'}">City</h3>
+                            <a class="btn btn-outline-secondary" th:href="@{/cities}">Back</a>
+                        </div>
 
-                <div th:if="${error}" class="alert alert-danger" th:text="${error}"></div>
-                <div th:if="${success}" class="alert alert-success" th:text="${success}"></div>
+                        <div th:if="${error}" class="alert alert-danger" th:text="${error}"></div>
+                        <div th:if="${success}" class="alert alert-success" th:text="${success}"></div>
 
-                <div class="card">
-                    <div class="card-body">
-                        <form method="post"
-                              th:action="${mode == 'edit'} ? @{/cities/{id}(id=${city.id})} : @{/cities}"
-                              class="row g-3">
+                        <div class="card">
+                            <div class="card-body">
+                                <form method="post"
+                                    th:action="${mode == 'edit'} ? @{/cities/{id}(id=${city.id})} : @{/cities}"
+                                    class="row g-3">
 
-                            <div class="col-md-6">
-                                <label class="form-label">ID City</label>
-                                <input type="text"
-                                       class="form-control"
-                                       th:value="${mode == 'edit' ? city.idCity : 'AUTO GENERATED'}"
-                                       readonly>
+                                    <div class="col-md-6">
+                                        <label class="form-label">ID City ${mode}</label>
+                                        <input type="text"
+                                            class="form-control"
+                                            th:value="${mode == 'edit' ? city.idCity : 'AUTO GENERATED'}"
+                                            readonly>
+                                    </div>
+
+                                    <div class="col-md-6">
+                                        <label class="form-label">Country</label>
+                                        <select name="idCountry" class="form-select" required>
+                                            <option value="">Select Country</option>
+                                            <option th:each="c : ${countries}"
+                                                    th:value="${c.idCountry}"
+                                                    th:text="${c.name}"
+                                                    th:selected="${c.idCountry == city.idCountry}">
+                                            </option>
+                                        </select>
+                                    </div>
+
+                                    <div class="col-md-6">
+                                        <label class="form-label">Province</label>
+                                        <select name="idProvince" class="form-select" required>
+                                            <option value="">Select Province</option>
+                                            <option th:each="p : ${provinces}"
+                                                    th:value="${p.idProvince}"
+                                                    th:text="${p.name}"
+                                                    th:selected="${p.idProvince == city.idProvince}">
+                                            </option>
+                                        </select>
+                                    </div>
+
+                                    <div class="col-md-6">
+                                        <label class="form-label">Code</label>
+                                        <input type="text"
+                                            name="code"
+                                            class="form-control"
+                                            th:value="${city.code}">
+                                    </div>
+
+                                    <div class="col-md-6">
+                                        <label class="form-label">Name</label>
+                                        <input type="text"
+                                            name="name"
+                                            class="form-control"
+                                            th:value="${city.name}"
+                                            required>
+                                    </div>
+
+                                    <div class="col-md-6">
+                                        <label class="form-label">Status</label>
+                                        <select name="status" class="form-select">
+                                            <option value="1" th:selected="${city.status == 1}">Active</option>
+                                            <option value="0" th:selected="${city.status == 0}">Inactive</option>
+                                        </select>
+                                    </div>
+
+                                    <div class="col-12 d-flex gap-2">
+                                        <button type="submit" class="btn btn-primary" th:text="${mode == 'edit' ? 'Save Changes' : 'Create City'}">
+                                            Save
+                                        </button>
+                                        <a class="btn btn-outline-secondary" th:href="@{/cities}">Cancel</a>
+                                    </div>
+                                </form>
+                                
+                                <hr class="my-4" th:if="${mode} == 'edit'">
+                                <hr class="my-4" th:if="${mode == 'edit'}">
+                                <div class="small text-muted" th:if="${mode == 'edit'}">
+                                    <div>
+                                        Created: <span th:text="${city.createdDate}"></span>
+                                        by <span th:text="${city.createdByName != null and !#strings.isEmpty(city.createdByName) ? city.createdByName : city.createdBy}"></span>
+                                    </div>
+                                    <div>
+                                        Updated: <span th:text="${city.updatedDate}"></span>
+                                        by <span th:text="${city.updatedByName != null and !#strings.isEmpty(city.updatedByName) ? city.updatedByName : city.updatedBy}"></span>
+                                    </div>
+                                </div>
                             </div>
-
-                            <div class="col-md-6">
-                                <label class="form-label">Country</label>
-                                <select name="idCountry" class="form-select" required>
-                                    <option value="">Select Country</option>
-                                    <option th:each="c : ${countries}"
-                                            th:value="${c.idCountry}"
-                                            th:text="${c.name}"
-                                            th:selected="${c.idCountry == city.idCountry}">
-                                    </option>
-                                </select>
-                            </div>
-
-                            <div class="col-md-6">
-                                <label class="form-label">Province</label>
-                                <select name="idProvince" class="form-select" required>
-                                    <option value="">Select Province</option>
-                                    <option th:each="p : ${provinces}"
-                                            th:value="${p.idProvince}"
-                                            th:text="${p.name}"
-                                            th:selected="${p.idProvince == city.idProvince}">
-                                    </option>
-                                </select>
-                            </div>
-
-                            <div class="col-md-6">
-                                <label class="form-label">Code</label>
-                                <input type="text"
-                                       name="code"
-                                       class="form-control"
-                                       th:value="${city.code}">
-                            </div>
-
-                            <div class="col-md-6">
-                                <label class="form-label">Name</label>
-                                <input type="text"
-                                       name="name"
-                                       class="form-control"
-                                       th:value="${city.name}"
-                                       required>
-                            </div>
-
-                            <div class="col-md-6">
-                                <label class="form-label">Status</label>
-                                <select name="status" class="form-select">
-                                    <option value="1" th:selected="${city.status == 1}">Active</option>
-                                    <option value="0" th:selected="${city.status == 0}">Inactive</option>
-                                </select>
-                            </div>
-
-                            <div class="col-12 d-flex gap-2">
-                                <button type="submit"
-                                        class="btn btn-primary"
-                                        th:text="${mode == 'edit' ? 'Save Changes' : 'Create City'}">
-                                    Save
-                                </button>
-                                <a class="btn btn-outline-secondary" th:href="@{/cities}">Cancel</a>
-                            </div>
-                        </form>
+                        </div>
                     </div>
-                </div>
+                </main>
             </div>
-        </main>
-    </div>
-</div>
+        </div>
 
-<div th:replace="~{fragments/layout :: scripts(~{::extraScripts})}">
-    <th:block th:fragment="extraScripts"></th:block>
-</div>
-</body>
+        <!-- Modal Start -->
+        <div th:replace="~{fragments/modal :: modal}"></div>
+        <!-- Modal End -->
+
+        <div th:replace="~{fragments/layout :: scripts(~{::extraScripts})}">
+            <th:block th:fragment="extraScripts"></th:block>
+        </div>
+    </body>
 </html>

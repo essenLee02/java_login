@@ -1,11 +1,12 @@
 package com.example.auth.repository;
 
-import com.example.auth.model.City;
+import java.util.List;
+
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Repository;
 
-import java.util.List;
+import com.example.auth.model.City;
 
 @Repository
 public class CityRepository {
@@ -33,6 +34,11 @@ public class CityRepository {
         c.setUpdatedBy(rs.getString("updated_by"));
         c.setDeletedDate(rs.getString("deleted_date"));
         c.setDeletedBy(rs.getString("deleted_by"));
+
+        // penting
+        c.setCreatedByName(rs.getString("created_by_name"));
+        c.setUpdatedByName(rs.getString("updated_by_name"));
+
         return c;
     };
 
@@ -41,10 +47,21 @@ public class CityRepository {
         String s = "%" + (search == null ? "" : search.trim()) + "%";
 
         String sql = """
-            SELECT ct.*, c.name AS country_name, p.name AS province_name
+            SELECT 
+                ct.*,
+                c.name AS country_name,
+                p.name AS province_name,
+                uc.name AS created_by_name,
+                uu.name AS updated_by_name
             FROM cities ct
-            LEFT JOIN countries c ON c.id_country = ct.id_country
-            LEFT JOIN provinces p ON p.id_province = ct.id_province
+            LEFT JOIN countries c
+                ON c.id_country = ct.id_country
+            LEFT JOIN provinces p
+                ON p.id_province = ct.id_province
+            LEFT JOIN users uc
+                ON uc.id = ct.created_by
+            LEFT JOIN users uu
+                ON uu.id = ct.updated_by
             WHERE (? = '' OR IFNULL(ct.code, '') LIKE ? OR ct.name LIKE ? OR IFNULL(c.name, '') LIKE ? OR IFNULL(p.name, '') LIKE ?)
             ORDER BY ct.name ASC
             LIMIT ? OFFSET ?
@@ -69,10 +86,21 @@ public class CityRepository {
 
     public City findById(Long id) {
         String sql = """
-            SELECT ct.*, c.name AS country_name, p.name AS province_name
+            SELECT
+                ct.*,
+                c.name AS country_name,
+                p.name AS province_name,
+                uc.name AS created_by_name,
+                uu.name AS updated_by_name
             FROM cities ct
-            LEFT JOIN countries c ON c.id_country = ct.id_country
-            LEFT JOIN provinces p ON p.id_province = ct.id_province
+            LEFT JOIN countries c
+                ON c.id_country = ct.id_country
+            LEFT JOIN provinces p
+                ON p.id_province = ct.id_province
+            LEFT JOIN users uc
+                ON uc.id = ct.created_by
+            LEFT JOIN users uu
+                ON uu.id = ct.updated_by
             WHERE ct.id = ?
         """;
         return jdbcTemplate.queryForObject(sql, rowMapper, id);

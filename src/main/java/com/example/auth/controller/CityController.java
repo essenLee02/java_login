@@ -1,13 +1,9 @@
 package com.example.auth.controller;
 
-import com.example.auth.model.City;
-import com.example.auth.model.Country;
-import com.example.auth.model.Province;
-import com.example.auth.service.CityService;
-import com.example.auth.service.CountryService;
-import com.example.auth.service.ProvinceService;
-import com.example.auth.util.GenerateController;
-import jakarta.servlet.http.HttpSession;
+import java.time.LocalDate;
+import java.util.List;
+import java.util.stream.IntStream;
+
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -18,9 +14,15 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
-import java.time.LocalDate;
-import java.util.List;
-import java.util.stream.IntStream;
+import com.example.auth.model.City;
+import com.example.auth.model.Country;
+import com.example.auth.model.Province;
+import com.example.auth.service.CityService;
+import com.example.auth.service.CountryService;
+import com.example.auth.service.ProvinceService;
+import com.example.auth.util.GenerateController;
+
+import jakarta.servlet.http.HttpSession;
 
 @Controller
 public class CityController extends GenerateController {
@@ -255,7 +257,8 @@ public class CityController extends GenerateController {
             @PathVariable Long id,
             @ModelAttribute City city,
             RedirectAttributes ra,
-            HttpSession session
+            HttpSession session,
+            Model model
     ) {
         if (!isLoggedIn(session)) {
             String logMessage = "Update denied because user is not logged in. id=%d"
@@ -264,6 +267,7 @@ public class CityController extends GenerateController {
             return "redirect:/login";
         }
 
+        model.addAttribute("mode", "edit");
         String userName = getLoginUserName(session);
 
         try {
@@ -292,9 +296,9 @@ public class CityController extends GenerateController {
                 return "redirect:/cities/" + id + "/edit";
             }
 
-            if (city.getStatus() == null) {
-                city.setStatus(existing.getStatus() == null ? 1 : existing.getStatus());
-            }
+            // if (city.getStatus() == null) {
+            //     city.setStatus(existing.getStatus() == null ? 1 : existing.getStatus());
+            // }
 
             service.update(id, city);
 
